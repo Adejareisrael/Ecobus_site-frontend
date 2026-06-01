@@ -3,10 +3,21 @@ import { cn } from "@/lib/utils";
 
 type Props = React.InputHTMLAttributes<HTMLInputElement>;
 
-export function Input({ className, disabled, ...props }: Props) {
+const blockedNumberKeys = new Set(["e", "E", "+", "-", ".", ","]);
+
+export function Input({ className, disabled, onKeyDown, type, inputMode, ...props }: Props) {
   return (
     <input
+      type={type}
+      inputMode={inputMode ?? (type === "number" ? "numeric" : undefined)}
       disabled={disabled}
+      onKeyDown={(event) => {
+        if (type === "number" && blockedNumberKeys.has(event.key)) {
+          event.preventDefault();
+        }
+
+        onKeyDown?.(event);
+      }}
       className={cn(
         "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm",
         "outline-none transition placeholder:text-slate-400",

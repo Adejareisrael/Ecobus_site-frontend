@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { uppercaseCodeInput } from "@/lib/form-input";
 
 type LookupResult = {
   id: string;
@@ -68,7 +69,7 @@ function BookingLookupContent() {
         <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
           <Input
             value={reference}
-            onChange={(event) => setReference(event.target.value)}
+            onChange={(event) => setReference(uppercaseCodeInput(event.target.value))}
             placeholder="ECO-123456"
             required
           />

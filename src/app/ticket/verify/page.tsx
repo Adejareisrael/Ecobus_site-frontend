@@ -6,6 +6,7 @@ import { Camera, ScanLine, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { uppercaseCodeInput } from "@/lib/form-input";
 import { BarcodeDetectorConstructor, parseTicketQr } from "@/lib/ticket-qr";
 
 export default function TicketVerifyPage() {
@@ -151,7 +152,7 @@ export default function TicketVerifyPage() {
         >
           <Input
             value={reference}
-            onChange={(event) => setReference(event.target.value)}
+            onChange={(event) => setReference(uppercaseCodeInput(event.target.value))}
             placeholder="Enter booking reference"
           />
           <Button type="submit" variant="secondary" className="gap-2" disabled={!reference.trim()}>

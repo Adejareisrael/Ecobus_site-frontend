@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { AppliedPromo } from "@/lib/types";
+import { uppercaseCodeInput } from "@/lib/form-input";
 import { formatNaira, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
 
 const PAYSTACK_PAGE_URL = process.env.NEXT_PUBLIC_PAYSTACK_PAGE_URL ?? "";
@@ -104,7 +105,7 @@ export default function PaymentPage() {
             <Input
               value={promoCode}
               onChange={(event) => {
-                setPromoCode(event.target.value.toUpperCase());
+                setPromoCode(uppercaseCodeInput(event.target.value));
                 setPromoMessage("");
               }}
               placeholder="ECO10"

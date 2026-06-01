@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/Select";
 import { PromoCode } from "@/lib/types";
 import { formatNaira } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
+import { positiveIntegerInput, uppercaseCodeInput } from "@/lib/form-input";
 
 type PromoForm = {
   id: string;
@@ -221,7 +222,9 @@ export default function AdminPromoCodesPage() {
                 Code
                 <Input
                   value={form.code}
-                  onChange={(event) => updateForm({ code: event.target.value.toUpperCase() })}
+                  onChange={(event) =>
+                    updateForm({ code: uppercaseCodeInput(event.target.value) })
+                  }
                   placeholder="ECO10"
                   required
                 />
@@ -245,9 +248,12 @@ export default function AdminPromoCodesPage() {
                 <Input
                   type="number"
                   min="1"
+                  step="1"
                   max={form.discountType === "percentage" ? "100" : undefined}
                   value={form.discountValue}
-                  onChange={(event) => updateForm({ discountValue: event.target.value })}
+                  onChange={(event) =>
+                    updateForm({ discountValue: positiveIntegerInput(event.target.value) })
+                  }
                   placeholder={form.discountType === "percentage" ? "10" : "1000"}
                   required
                 />
@@ -258,8 +264,11 @@ export default function AdminPromoCodesPage() {
                 <Input
                   type="number"
                   min="0"
+                  step="1"
                   value={form.minSpend}
-                  onChange={(event) => updateForm({ minSpend: event.target.value })}
+                  onChange={(event) =>
+                    updateForm({ minSpend: positiveIntegerInput(event.target.value) })
+                  }
                 />
               </label>
 
@@ -268,8 +277,11 @@ export default function AdminPromoCodesPage() {
                 <Input
                   type="number"
                   min="1"
+                  step="1"
                   value={form.maxUses}
-                  onChange={(event) => updateForm({ maxUses: event.target.value })}
+                  onChange={(event) =>
+                    updateForm({ maxUses: positiveIntegerInput(event.target.value) })
+                  }
                   placeholder="Unlimited"
                 />
               </label>

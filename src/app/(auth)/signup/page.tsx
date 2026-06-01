@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth-store";
 import type { User } from "@/store/auth-store";
+import { phoneInput } from "@/lib/form-input";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -68,13 +69,18 @@ export default function SignupPage() {
         />
         <Input
           placeholder="Email address"
+          type="email"
+          autoComplete="email"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <Input
           placeholder="Phone number"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
           value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          onChange={(e) => setForm({ ...form, phone: phoneInput(e.target.value) })}
         />
         <Input
           type="password"

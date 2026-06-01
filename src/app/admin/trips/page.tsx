@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { formatNaira } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
+import { positiveIntegerInput } from "@/lib/form-input";
 
 type TripForm = {
   id: string;
@@ -328,8 +329,11 @@ export default function AdminTripsPage() {
                 <Input
                   type="number"
                   min="1"
+                  step="1"
                   value={form.price}
-                  onChange={(event) => updateForm({ price: event.target.value })}
+                  onChange={(event) =>
+                    updateForm({ price: positiveIntegerInput(event.target.value) })
+                  }
                   placeholder="15000"
                   required
                 />
@@ -366,9 +370,10 @@ export default function AdminTripsPage() {
                 <Input
                   type="number"
                   min="1"
+                  step="1"
                   value={form.availableSeats}
                   onChange={(event) =>
-                    updateForm({ availableSeats: event.target.value })
+                    updateForm({ availableSeats: positiveIntegerInput(event.target.value) })
                   }
                   required
                   disabled={Boolean(form.busLayoutId)}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { useEffect } from "react";
+import { phoneInput } from "@/lib/form-input";
 
 export default function PassengerPage() {
   const router = useRouter();
@@ -63,9 +64,12 @@ export default function PassengerPage() {
           <Input
             className="h-12"
             placeholder="Phone number"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
             value={passenger.phone}
             onChange={(e) =>
-              setPassenger({ phone: e.target.value })
+              setPassenger({ phone: phoneInput(e.target.value) })
             }
           />
 

@@ -15,6 +15,7 @@ import {
 } from "@/lib/site-settings-storage";
 import { useAuthStore } from "@/store/auth-store";
 import { formatNaira, getBookingTotal } from "@/lib/utils";
+import { phoneInput } from "@/lib/form-input";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -328,9 +329,11 @@ export default function AdminPage() {
             <label className="grid gap-1 text-xs font-medium text-slate-500">
               WhatsApp number
               <Input
+                type="tel"
+                inputMode="tel"
                 value={settings.whatsappNumber}
                 onChange={(event) =>
-                  updateSettings({ whatsappNumber: event.target.value })
+                  updateSettings({ whatsappNumber: phoneInput(event.target.value) })
                 }
               />
             </label>

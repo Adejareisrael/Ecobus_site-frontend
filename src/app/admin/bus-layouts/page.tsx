@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { useAuthStore } from "@/store/auth-store";
+import { positiveIntegerInput } from "@/lib/form-input";
 
 type LayoutForm = {
   id: string;
@@ -312,8 +313,11 @@ export default function AdminBusLayoutsPage() {
                   type="number"
                   min="1"
                   max="12"
+                  step="1"
                   value={form.rows}
-                  onChange={(event) => updateForm({ rows: event.target.value })}
+                  onChange={(event) =>
+                    updateForm({ rows: positiveIntegerInput(event.target.value) })
+                  }
                 />
               </label>
 
@@ -323,8 +327,11 @@ export default function AdminBusLayoutsPage() {
                   type="number"
                   min="1"
                   max="8"
+                  step="1"
                   value={form.columns}
-                  onChange={(event) => updateForm({ columns: event.target.value })}
+                  onChange={(event) =>
+                    updateForm({ columns: positiveIntegerInput(event.target.value) })
+                  }
                 />
               </label>
             </div>
