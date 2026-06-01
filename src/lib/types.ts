@@ -2,6 +2,7 @@ export type Terminal = {
   id: string;
   name: string;
   city: string;
+  state: string;
 };
 
 /**
@@ -21,9 +22,20 @@ export type Trip = {
 
   availableSeats: number;
 
-  busType: "AC" | "Executive" | "Standard";
+  busType: string;
+  busLayoutId?: string | null;
+  isActive?: boolean;
 
   routeLabel: string;
+};
+
+export type BusLayout = {
+  id: string;
+  name: string;
+  model: string;
+  totalSeats: number;
+  seats: Seat[];
+  isDefault: boolean;
 };
 
 /**
@@ -64,14 +76,41 @@ export type Booking = {
   reference: string;
 
   trip: Trip;
+  travelDate: string;
 
   seats: string[];
 
   passenger: Passenger;
 
   paymentMethod: "Card" | "Transfer";
+  promoCode?: string | null;
+  discountAmount?: number;
 
   createdAt: string;
 
   status: BookingStatus;
+  checkedInAt?: string | null;
+  checkedInBy?: string | null;
+};
+
+export type PromoCode = {
+  id: string;
+  code: string;
+  description?: string | null;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  minSpend: number;
+  maxUses?: number | null;
+  usedCount: number;
+  startsAt?: string | null;
+  expiresAt?: string | null;
+  isActive: boolean;
+};
+
+export type AppliedPromo = {
+  code: string;
+  discountAmount: number;
+  totalBeforeDiscount: number;
+  totalAfterDiscount: number;
+  description?: string | null;
 };

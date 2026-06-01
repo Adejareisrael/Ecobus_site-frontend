@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
           departureTerminalId: "",
           destinationTerminalId: "",
         },
+        travelDate: b.travelDate,
         seats: JSON.parse(b.seatsJson) as string[],
         passenger: {
           fullName: b.passengerName,
@@ -38,7 +39,11 @@ export async function GET(req: NextRequest) {
           email: b.passengerEmail,
         },
         paymentMethod: "Card",
+        promoCode: b.promoCode,
+        discountAmount: b.discountAmount,
         status: b.status,
+        checkedInAt: b.checkedInAt?.toISOString() ?? null,
+        checkedInBy: b.checkedInBy ?? null,
         createdAt: b.createdAt.toISOString(),
       }))
     );

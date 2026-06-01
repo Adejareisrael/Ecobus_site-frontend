@@ -1,117 +1,93 @@
-import { Booking, Seat, Terminal, Trip } from "./types";
+import { Booking, Seat, Trip } from "./types";
+import {
+  generateGenericSeats,
+  generateToyotaSeats,
+  toyotaLayoutId,
+} from "./bus-layouts";
 
 /**
- * 🏢 Terminals (stable reference data)
- */
-export const terminals: Terminal[] = [
-  { id: "lagos-jibowu", name: "Lagos (Jibowu)", city: "Lagos" },
-  { id: "abuja", name: "Abuja", city: "Abuja" },
-  { id: "benin", name: "Benin", city: "Benin" },
-  { id: "ph", name: "Port Harcourt", city: "Port Harcourt" },
-];
-
-/**
- * 🚌 Trips (NOW aligned with updated types)
+ * 🚌 Trips
  */
 export const trips: Trip[] = [
   {
     id: "trip-001",
-    departureTerminalId: "lagos-jibowu",
-    destinationTerminalId: "benin",
+    departureTerminalId: "lagos-fadeyi",
+    destinationTerminalId: "benin-idokpa",
+
     departureTime: "07:00",
     arrivalTime: "11:30",
+
     price: 15000,
-    availableSeats: 18,
-    busType: "AC",
-    routeLabel: "Lagos → Benin",
+    availableSeats: 14,
+
+    busType: "Toyota",
+    busLayoutId: toyotaLayoutId,
+
+    routeLabel: "Lagos Fadeyi -> Benin Idokpa",
   },
+
   {
     id: "trip-002",
-    departureTerminalId: "lagos-jibowu",
-    destinationTerminalId: "abuja",
-    departureTime: "08:30",
-    arrivalTime: "17:00",
-    price: 28000,
+    departureTerminalId: "lagos-ajah",
+    destinationTerminalId: "onitsha-ukumango",
+
+    departureTime: "08:00",
+    arrivalTime: "15:00",
+
+    price: 24000,
     availableSeats: 9,
+
     busType: "Executive",
-    routeLabel: "Lagos → Abuja",
+
+    routeLabel: "Lagos Ajah -> Onitsha Ukumango",
   },
+
   {
     id: "trip-003",
-    departureTerminalId: "benin",
-    destinationTerminalId: "lagos-jibowu",
+    departureTerminalId: "benin-ramat-park",
+    destinationTerminalId: "lagos-fadeyi",
+
     departureTime: "14:00",
     arrivalTime: "18:20",
+
     price: 14000,
     availableSeats: 24,
+
     busType: "Standard",
-    routeLabel: "Benin → Lagos",
+
+    routeLabel: "Benin Ramat Park -> Lagos Fadeyi",
   },
+
   {
     id: "trip-004",
-    departureTerminalId: "abuja",
-    destinationTerminalId: "ph",
-    departureTime: "09:00",
+    departureTerminalId: "onitsha-ukumango",
+    destinationTerminalId: "lagos-ajah",
+
+    departureTime: "08:00",
     arrivalTime: "16:40",
+
     price: 26000,
-    availableSeats: 12,
-    busType: "Executive",
-    routeLabel: "Abuja → Port Harcourt",
+    availableSeats: 14,
+
+    busType: "Toyota",
+    busLayoutId: toyotaLayoutId,
+
+    routeLabel: "Onitsha Ukumango -> Lagos Ajah",
   },
 ];
 
 /**
- * 🎫 Bookings (in-memory mock DB)
+ * 🎫 Mock bookings
  */
 export const bookings: Booking[] = [];
 
 /**
- * 💺 Deterministic seat generator (NO randomness)
- * This fixes unstable UI behavior
+ * 💺 Deterministic seat generator
  */
-export function generateSeats(busType: Trip["busType"]): Seat[] {
-  let totalRows = 5;
-
-  if (busType === "Executive") totalRows = 4;
-  if (busType === "Standard") totalRows = 5;
-  if (busType === "AC") totalRows = 5;
-
-  const seats: Seat[] = [];
-
-  // FRONT SEAT
-  seats.push({
-    id: "front-seat",
-    label: "F1",
-    isAvailable: true,
-    row: 0,
-    column: 2,
-  });
-
-  // deterministic availability function
-  const isAvailable = (row: number, col: number) =>
-    (row * 7 + col * 3) % 5 !== 0;
-
-  for (let r = 1; r <= totalRows; r++) {
-    const leftSeats = ["A", "B"];
-
-    leftSeats.forEach((label, index) => {
-      seats.push({
-        id: `${r}${label}`,
-        label: `${r}${label}`,
-        isAvailable: isAvailable(r, index),
-        row: r,
-        column: index,
-      });
-    });
-
-    seats.push({
-      id: `${r}C`,
-      label: `${r}C`,
-      isAvailable: isAvailable(r, 2),
-      row: r,
-      column: 2,
-    });
-  }
-
-  return seats;
+export function generateSeats(
+  busType: Trip["busType"],
+  availableSeats = 14
+): Seat[] {
+  if (busType === "Toyota" || busType === "AC") return generateToyotaSeats();
+  return generateGenericSeats(availableSeats);
 }

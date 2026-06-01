@@ -14,23 +14,22 @@ export default function DashboardPage() {
 
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
-  const [authChecked, setAuthChecked] = useState(false);
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setAuthChecked(true);
-  }, []);
-
-  useEffect(() => {
-    if (authChecked && !user) {
+    if (!user) {
       router.replace("/login");
     }
-  }, [authChecked, user, router]);
+  }, [user, router]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      queueMicrotask(() => setLoading(false));
+      return;
+    }
+
     fetch("/api/bookings", {
       headers: { Authorization: `Bearer ${token}` },
     })

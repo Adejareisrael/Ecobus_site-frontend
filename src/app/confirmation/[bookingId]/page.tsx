@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import QRCode from "qrcode";
 import { Booking } from "@/lib/types";
 import { useBookingStore } from "@/store/booking-store";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { formatNaira, getBookingTotal } from "@/lib/utils";
+import { formatNaira, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
 
 export default function ConfirmationPage() {
   const router = useRouter();
@@ -14,21 +15,20 @@ export default function ConfirmationPage() {
 
   const lastBooking = useBookingStore((s) => s.lastBooking);
   const resetFlow = useBookingStore((s) => s.resetFlow);
+  const bookingId = params.bookingId;
+  const storedBooking = lastBooking?.id === bookingId ? lastBooking : null;
 
-  const [booking, setBooking] = useState<Booking | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [booking, setBooking] = useState<Booking | null>(storedBooking);
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [loading, setLoading] = useState(!storedBooking);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    // Use store data immediately if it matches (avoids API round-trip)
-    if (lastBooking?.id === params.bookingId) {
-      setBooking(lastBooking);
-      setLoading(false);
+    if (storedBooking) {
       return;
     }
 
-    // Fallback: fetch from DB (covers page refreshes and direct links)
-    fetch(`/api/bookings/${params.bookingId}`)
+    fetch(`/api/bookings/${bookingId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Not found");
         return res.json() as Promise<Booking>;
@@ -36,35 +36,129 @@ export default function ConfirmationPage() {
       .then((data) => setBooking(data))
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [params.bookingId, lastBooking]);
+  }, [bookingId, storedBooking]);
 
-  const total = useMemo(() => {
+  const subtotal = useMemo(() => {
     if (!booking) return 0;
     return getBookingTotal(booking.trip.price, booking.seats.length);
   }, [booking]);
 
-  const downloadTicket = () => {
+  const discountAmount = booking?.discountAmount ?? 0;
+  const total = getDiscountedTotal(subtotal, discountAmount);
+
+  useEffect(() => {
     if (!booking) return;
 
-    const blob = new Blob(
-      [
-        `Ecobus Ticket
-Reference: ${booking.reference}
-Route: ${booking.trip.routeLabel}
-Seats: ${booking.seats.join(", ")}
-Passenger: ${booking.passenger.fullName}
-Total: ${formatNaira(total)}
-`,
-      ],
-      { type: "text/plain" }
-    );
+    const ticketUrl = `${window.location.origin}/confirmation/${booking.id}?ref=${encodeURIComponent(booking.reference)}`;
+    QRCode.toDataURL(ticketUrl, { margin: 1, width: 220 })
+      .then(setQrCodeUrl)
+      .catch(() => setQrCodeUrl(""));
+  }, [booking]);
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Ecobus-${booking.reference}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const downloadTicket = async () => {
+    if (!booking || !qrCodeUrl) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 900;
+    canvas.height = 1320;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const loadImage = (src: string) =>
+      new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+
+    const drawRoundRect = (
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      radius: number,
+      fill: string,
+      stroke?: string
+    ) => {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + width, y, x + width, y + height, radius);
+      ctx.arcTo(x + width, y + height, x, y + height, radius);
+      ctx.arcTo(x, y + height, x, y, radius);
+      ctx.arcTo(x, y, x + width, y, radius);
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    };
+
+    const drawLabelValue = (label: string, value: string, x: number, y: number) => {
+      ctx.fillStyle = "#64748b";
+      ctx.font = "500 24px Arial";
+      ctx.fillText(label, x, y);
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "700 30px Arial";
+      ctx.fillText(value, x, y + 42);
+    };
+
+    const qrImage = await loadImage(qrCodeUrl);
+
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawRoundRect(44, 44, 812, 1232, 28, "#ffffff", "#e2e8f0");
+
+    ctx.fillStyle = "#0f4f8a";
+    ctx.fillRect(44, 44, 812, 180);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 44px Arial";
+    ctx.fillText("Ecobus Digital Ticket", 96, 122);
+    ctx.font = "600 28px Arial";
+    ctx.fillText(booking.reference, 96, 170);
+
+    ctx.fillStyle = "#d82027";
+    ctx.fillRect(44, 224, 812, 10);
+
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "700 38px Arial";
+    ctx.fillText(booking.trip.routeLabel, 96, 318);
+
+    drawRoundRect(96, 370, 708, 300, 18, "#f8fafc", "#e2e8f0");
+    drawLabelValue("Passenger", booking.passenger.fullName, 132, 430);
+    drawLabelValue("Phone", booking.passenger.phone, 484, 430);
+    drawLabelValue("Travel date", booking.travelDate, 132, 552);
+    drawLabelValue("Departure", booking.trip.departureTime, 484, 552);
+
+    drawRoundRect(96, 710, 708, 220, 18, "#ffffff", "#e2e8f0");
+    drawLabelValue("Seat(s)", booking.seats.join(", "), 132, 770);
+    drawLabelValue("Status", booking.status, 484, 770);
+    drawLabelValue("Total paid", formatNaira(total), 132, 884);
+    if (discountAmount > 0) {
+      drawLabelValue("Discount", formatNaira(discountAmount), 484, 884);
+    }
+
+    ctx.drawImage(qrImage, 315, 974, 270, 270);
+    ctx.fillStyle = "#475569";
+    ctx.font = "500 22px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Scan this QR code to confirm this booking", 450, 1266);
+    ctx.textAlign = "start";
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Ecobus-${booking.reference}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, "image/png");
   };
 
   if (loading) {
@@ -121,7 +215,7 @@ Total: ${formatNaira(total)}
           <div className="text-center space-y-1">
             <p className="text-lg font-semibold">{booking.trip.routeLabel}</p>
             <p className="text-sm text-slate-500">
-              Departure: {booking.trip.departureTime}
+              Date: {booking.travelDate} · Departure: {booking.trip.departureTime}
             </p>
           </div>
 
@@ -132,6 +226,10 @@ Total: ${formatNaira(total)}
               <strong>{booking.passenger.fullName}</strong>
             </div>
             <div className="flex justify-between">
+              <span>Travel date</span>
+              <strong>{booking.travelDate}</strong>
+            </div>
+            <div className="flex justify-between">
               <span>Seats</span>
               <strong>{booking.seats.join(", ")}</strong>
             </div>
@@ -139,13 +237,27 @@ Total: ${formatNaira(total)}
               <span>Total Paid</span>
               <strong className="text-ecobus-red">{formatNaira(total)}</strong>
             </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between">
+                <span>Discount</span>
+                <strong>{formatNaira(discountAmount)}</strong>
+              </div>
+            )}
           </div>
 
-          {/* QR placeholder */}
           <div className="flex justify-center">
-            <div className="h-28 w-28 rounded-xl border bg-slate-100 flex items-center justify-center text-xs text-slate-400">
-              QR CODE
-            </div>
+            {qrCodeUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={qrCodeUrl}
+                alt={`QR code for ticket ${booking.reference}`}
+                className="h-36 w-36 rounded-xl border border-slate-200 bg-white p-2"
+              />
+            ) : (
+              <div className="h-36 w-36 rounded-xl border bg-slate-100 flex items-center justify-center text-xs text-slate-400">
+                QR CODE
+              </div>
+            )}
           </div>
 
         </div>
@@ -153,7 +265,7 @@ Total: ${formatNaira(total)}
 
       {/* ACTIONS */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <Button onClick={downloadTicket} className="w-full">
+        <Button onClick={downloadTicket} className="w-full" disabled={!qrCodeUrl}>
           Download
         </Button>
         <Button variant="secondary" onClick={() => window.print()}>

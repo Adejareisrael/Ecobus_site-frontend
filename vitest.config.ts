@@ -6,8 +6,6 @@ export default defineConfig({
     environment: "node",
     globals: true,
     setupFiles: ["./src/__tests__/setup.ts"],
-    pool: "forks",
-    forks: { singleFork: true },
     fileParallelism: false,
     env: {
       JWT_SECRET: "test-jwt-secret-for-vitest-min-32-characters!!",

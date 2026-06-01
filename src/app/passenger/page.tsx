@@ -19,7 +19,7 @@ export default function PassengerPage() {
 
   useEffect(() => {
     if (!trip || selectedSeats.length === 0) {
-      router.replace("/seats");
+      router.replace("/search");
     }
   }, [trip, selectedSeats, router]);
 
@@ -86,7 +86,11 @@ export default function PassengerPage() {
           <Button
             className="w-full lg:w-auto"
             onClick={() => router.push("/payment")}
-            disabled={!passenger.fullName || !passenger.phone}
+            disabled={
+              !passenger.fullName.trim() ||
+              !passenger.phone.trim() ||
+              !passenger.email.trim()
+            }
           >
             Proceed to payment
           </Button>

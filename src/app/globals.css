@@ -2,6 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    color-scheme: light;
+    --ecobus-primary: 220 38 38;
+    --ecobus-secondary: 124 58 237;
+    --ecobus-ink: 15 23 42;
+    --ecobus-soft: 253 242 248;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --ecobus-primary: 14 165 233;
+    --ecobus-secondary: 34 211 238;
+    --ecobus-ink: 226 232 240;
+    --ecobus-soft: 8 18 38;
+  }
+}
+
 body {
   @apply bg-ecobus-light text-ecobus-dark;
+}
+
+@layer utilities {
+  .dark body {
+    background-color: rgb(2 6 23);
+    color: rgb(241 245 249);
+  }
+
+  .dark .bg-white,
+  .dark .bg-white\/60,
+  .dark .bg-white\/80 {
+    background-color: rgb(15 23 42);
+  }
+
+  .dark .bg-slate-50,
+  .dark .bg-slate-100 {
+    background-color: rgb(30 41 59);
+  }
+
+  .dark .bg-slate-200 {
+    background-color: rgb(51 65 85);
+  }
+
+  .dark .border,
+  .dark .border-slate-100,
+  .dark .border-slate-200,
+  .dark .border-slate-300 {
+    border-color: rgb(51 65 85);
+  }
+
+  .dark .text-slate-900,
+  .dark .text-slate-800,
+  .dark .text-slate-700 {
+    color: rgb(241 245 249);
+  }
+
+  .dark .text-slate-600,
+  .dark .text-slate-500 {
+    color: rgb(203 213 225);
+  }
+
+  .dark .text-slate-400 {
+    color: rgb(100 116 139);
+  }
+
+  .dark .shadow-sm,
+  .dark .shadow-lg,
+  .dark .shadow-2xl {
+    box-shadow: 0 18px 60px rgb(0 0 0 / 0.28);
+  }
 }

@@ -21,11 +21,18 @@ model Booking {
   id             String   @id @default(cuid())
   reference      String   @unique
   paystackRef    String   @unique
+  paymentStatus  String   @default("Paid")
+  amountPaid     Int?
+  currency       String   @default("NGN")
+  paidAt         DateTime?
   tripId         String
+  travelDate     String   @default("")
   routeLabel     String
   departureTime  String
   busType        String
   price          Int
+  promoCode      String?
+  discountAmount Int      @default(0)
   seatsJson      String
   passengerName  String
   passengerPhone String
@@ -33,5 +40,109 @@ model Booking {
   userId         String?
   user           User?    @relation(fields: [userId], references: [id])
   status         String   @default("Confirmed")
+  checkedInAt    DateTime?
+  checkedInBy    String?
   createdAt      DateTime @default(now())
+}
+
+model TicketDelivery {
+  id          String    @id @default(cuid())
+  bookingId   String
+  reference   String
+  channel     String
+  recipient   String
+  subject     String?
+  message     String
+  status      String    @default("Pending")
+  lastError   String?
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model PromoCode {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  description   String?
+  discountType  String
+  discountValue Int
+  minSpend      Int      @default(0)
+  maxUses       Int?
+  usedCount     Int      @default(0)
+  startsAt      DateTime?
+  expiresAt     DateTime?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Trip {
+  id                    String    @id @default(cuid())
+
+  departureTerminalId   String
+  destinationTerminalId String
+
+  routeLabel            String
+
+  departureTime         String
+  arrivalTime           String
+
+  price                 Int
+  availableSeats        Int
+
+  busType               String
+  busLayoutId           String?
+  busLayout             BusLayout? @relation(fields: [busLayoutId], references: [id])
+  isActive              Boolean  @default(true)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model BusLayout {
+  id          String   @id @default(cuid())
+  name        String
+  model       String
+  totalSeats  Int
+  seatsJson   String
+  isDefault   Boolean  @default(false)
+  trips       Trip[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Terminal {
+  id      String @id @default(cuid())
+
+  name    String
+  city    String
+  state   String
+
+  createdAt DateTime @default(now())
+}
+
+model SiteSettings {
+  id                  String   @id @default("site")
+  heroTitlePrefix     String
+  heroBrand           String
+  heroDescription     String
+  heroEyebrow         String
+  heroCardTitle       String
+  heroCardDescription String
+  popularRoutesJson   String
+  footerDescription   String
+  supportText         String
+  whatsappNumber      String
+  whatsappMessage     String
+  email               String   @default("info@ecobustransport.com")
+  facebookHandle      String   @default("@Ecobus.ng")
+  instagramHandle     String   @default("Ecobus_transport")
+  xHandle             String   @default("Ecobustransport")
+  facebookUrl         String   @default("https://facebook.com/Ecobus.ng")
+  instagramUrl        String   @default("https://instagram.com/Ecobus_transport")
+  xUrl                String   @default("https://x.com/Ecobustransport")
+  responseTimeText    String
+  bottomNote          String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }

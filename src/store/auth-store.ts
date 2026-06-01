@@ -13,8 +13,10 @@ export type User = {
 type AuthState = {
   user: User | null;
   token: string | null;
+  hydrated: boolean;
   login: (user: User, token: string) => void;
   logout: () => void;
+  setHydrated: (hydrated: boolean) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -22,13 +24,19 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      hydrated: false,
 
       login: (user: User, token: string) => set({ user, token }),
 
       logout: () => set({ user: null, token: null }),
+
+      setHydrated: (hydrated) => set({ hydrated }),
     }),
     {
       name: "ecobus-auth",
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     }
   )
 );

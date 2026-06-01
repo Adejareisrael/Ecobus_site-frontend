@@ -2,10 +2,20 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BusFront, LayoutDashboard, Calendar, Ticket } from "lucide-react";
+import {
+  BusFront,
+  Calendar,
+  BadgePercent,
+  LayoutDashboard,
+  MapPin,
+  Send,
+  ShieldCheck,
+  Ticket,
+} from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { useEffect } from "react";
 import Image from "next/image";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function AdminLayout({
   children,
@@ -15,8 +25,11 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const hydrated = useAuthStore((s) => s.hydrated);
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (!user) {
       router.replace("/login");
       return;
@@ -25,11 +38,11 @@ export default function AdminLayout({
     if (user.role !== "admin") {
       router.replace("/dashboard");
     }
-  }, [user, router]);
+  }, [hydrated, user, router]);
 
   const isActive = (path: string) => pathname === path;
 
-  if (!user || user.role !== "admin") {
+  if (!hydrated || !user || user.role !== "admin") {
     return (
       <div className="flex h-screen items-center justify-center text-slate-500">
         Loading admin panel...
@@ -48,20 +61,23 @@ export default function AdminLayout({
   <Image
     src="/ecobus-logo.jpg"
     alt="Ecobus Logo"
-    width={120}
-    height={40}
+    width={32}
+    height={32}
     className="h-8 w-auto object-contain"
   />
 
-  <div>
-    <p className="font-bold">Admin Panel</p>
-    <p className="text-xs text-slate-500">Ecobus Control</p>
-  </div>
 </div>
 
           <div>
             <p className="font-bold">Admin Panel</p>
             <p className="text-xs text-slate-500">Ecobus Control</p>
+          </div>
+        </div>
+
+        <div className="border-b px-3 py-3">
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2">
+            <span className="text-sm font-medium">Theme</span>
+            <ThemeToggle />
           </div>
         </div>
 
@@ -92,6 +108,18 @@ export default function AdminLayout({
           </Link>
 
           <Link
+            href="/admin/ticket-delivery"
+            className={`flex items-center gap-2 p-3 rounded-xl transition ${
+              isActive("/admin/ticket-delivery")
+                ? "bg-red-50 text-red-600"
+                : "hover:bg-slate-100"
+            }`}
+          >
+            <Send className="h-4 w-4" />
+            Ticket delivery
+          </Link>
+
+          <Link
             href="/admin/trips"
             className={`flex items-center gap-2 p-3 rounded-xl transition ${
               isActive("/admin/trips")
@@ -103,6 +131,54 @@ export default function AdminLayout({
             Trips
           </Link>
 
+          <Link
+            href="/admin/bus-layouts"
+            className={`flex items-center gap-2 p-3 rounded-xl transition ${
+              isActive("/admin/bus-layouts")
+                ? "bg-purple-50 text-purple-600"
+                : "hover:bg-slate-100"
+            }`}
+          >
+            <BusFront className="h-4 w-4" />
+            Bus layouts
+          </Link>
+
+          <Link
+            href="/admin/promo-codes"
+            className={`flex items-center gap-2 p-3 rounded-xl transition ${
+              isActive("/admin/promo-codes")
+                ? "bg-purple-50 text-purple-600"
+                : "hover:bg-slate-100"
+            }`}
+          >
+            <BadgePercent className="h-4 w-4" />
+            Promo codes
+          </Link>
+
+          <Link
+            href="/admin/terminals"
+            className={`flex items-center gap-2 p-3 rounded-xl transition ${
+              isActive("/admin/terminals")
+                ? "bg-purple-50 text-purple-600"
+                : "hover:bg-slate-100"
+            }`}
+          >
+            <MapPin className="h-4 w-4" />
+            Terminals
+          </Link>
+
+          <Link
+            href="/admin/validate"
+            className={`flex items-center gap-2 p-3 rounded-xl transition ${
+              isActive("/admin/validate")
+                ? "bg-emerald-50 text-emerald-600"
+                : "hover:bg-slate-100"
+            }`}
+          >
+            <ShieldCheck className="h-4 w-4" />
+            Validate
+          </Link>
+
         </nav>
       </aside>
 
@@ -111,6 +187,7 @@ export default function AdminLayout({
 
         {/* MOBILE NAV (NOW CORRECTLY INSIDE RETURN) */}
         <div className="md:hidden bg-white border-b px-4 py-3 flex gap-4 text-sm overflow-x-auto">
+          <ThemeToggle className="h-9 w-9 shrink-0" />
           
           <Link
             href="/admin"
@@ -131,12 +208,57 @@ export default function AdminLayout({
           </Link>
 
           <Link
+            href="/admin/ticket-delivery"
+            className={`whitespace-nowrap ${
+              isActive("/admin/ticket-delivery") ? "text-red-600 font-semibold" : ""
+            }`}
+          >
+            Ticket delivery
+          </Link>
+
+          <Link
             href="/admin/trips"
             className={`whitespace-nowrap ${
               isActive("/admin/trips") ? "text-purple-600 font-semibold" : ""
             }`}
           >
             Trips
+          </Link>
+
+          <Link
+            href="/admin/bus-layouts"
+            className={`whitespace-nowrap ${
+              isActive("/admin/bus-layouts") ? "text-purple-600 font-semibold" : ""
+            }`}
+          >
+            Bus layouts
+          </Link>
+
+          <Link
+            href="/admin/promo-codes"
+            className={`whitespace-nowrap ${
+              isActive("/admin/promo-codes") ? "text-purple-600 font-semibold" : ""
+            }`}
+          >
+            Promo codes
+          </Link>
+
+          <Link
+            href="/admin/terminals"
+            className={`whitespace-nowrap ${
+              isActive("/admin/terminals") ? "text-purple-600 font-semibold" : ""
+            }`}
+          >
+            Terminals
+          </Link>
+
+          <Link
+            href="/admin/validate"
+            className={`whitespace-nowrap ${
+              isActive("/admin/validate") ? "text-emerald-600 font-semibold" : ""
+            }`}
+          >
+            Validate
           </Link>
 
         </div>

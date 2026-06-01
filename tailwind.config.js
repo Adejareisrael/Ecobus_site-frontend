@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class",
   content: [
     "./src/app/**/*.{js,ts,jsx,tsx}",
     "./src/components/**/*.{js,ts,jsx,tsx}",
@@ -8,10 +9,10 @@ module.exports = {
     extend: {
       colors: {
         ecobus: {
-          red: "#DC2626",      // modern transport red (bold, premium)
-          purple: "#7C3AED",   // accent / secondary brand color
-          dark: "#0F172A",     // optional for text depth
-          light: "#FDF2F8",    // soft background tone
+          red: "rgb(var(--ecobus-primary) / <alpha-value>)",
+          purple: "rgb(var(--ecobus-secondary) / <alpha-value>)",
+          dark: "rgb(var(--ecobus-ink) / <alpha-value>)",
+          light: "rgb(var(--ecobus-soft) / <alpha-value>)",
         },
       },
     },

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Trip } from "@/lib/types";
+import { getTrips } from "@/lib/api";
 import { TripCard } from "./TripCard";
 import { Select } from "./ui/Select";
 import { Card } from "./ui/Card";
@@ -11,6 +12,7 @@ type TimeFilter = "all" | "morning" | "afternoon" | "evening";
 
 type Props = {
   trips: Trip[];
+  searchParams?: { from?: string; to?: string; date?: string };
 };
 
 function getHour(time: string) {
@@ -18,12 +20,34 @@ function getHour(time: string) {
   return parseInt(time.split(":")[0], 10);
 }
 
-export function TripResults({ trips }: Props) {
+export function TripResults({ trips, searchParams = {} }: Props) {
   const [priceSort, setPriceSort] = useState<PriceSort>("all");
   const [timeSort, setTimeSort] = useState<TimeFilter>("all");
+  const [visibleTrips, setVisibleTrips] = useState(trips);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncTrips() {
+      const latestTrips = await getTrips(searchParams);
+      if (!cancelled) setVisibleTrips(latestTrips);
+    }
+
+    void syncTrips();
+
+    const handleTripStorageChange = () => {
+      void syncTrips();
+    };
+
+    window.addEventListener("storage", handleTripStorageChange);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("storage", handleTripStorageChange);
+    };
+  }, [searchParams]);
 
   const filteredTrips = useMemo(() => {
-    let list = [...trips];
+    let list = [...visibleTrips];
 
     /**
      * 🕒 TIME FILTER FIRST (narrowing logic)
@@ -52,7 +76,7 @@ export function TripResults({ trips }: Props) {
     }
 
     return list;
-  }, [priceSort, timeSort, trips]);
+  }, [priceSort, timeSort, visibleTrips]);
 
   return (
     <div className="space-y-5">
@@ -89,7 +113,7 @@ export function TripResults({ trips }: Props) {
           </Card>
         ) : (
           filteredTrips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} />
+            <TripCard key={trip.id} trip={trip} travelDate={searchParams.date} />
           ))
         )}
       </div>

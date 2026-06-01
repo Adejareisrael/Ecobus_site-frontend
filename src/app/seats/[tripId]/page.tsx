@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { getSeats, getTripById } from "@/lib/api";
 import { Trip, Seat } from "@/lib/types";
@@ -11,13 +11,17 @@ import { SeatSelector } from "@/components/SeatSelector";
 import { BookingSummary } from "@/components/BookingSummary";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { normalizeTravelDate } from "@/lib/travel-date";
 
 export default function SeatPage() {
   const router = useRouter();
   const params = useParams<{ tripId: string }>();
+  const searchParams = useSearchParams();
 
   const setTripInStore = useBookingStore((state) => state.setTrip);
+  const setTravelDate = useBookingStore((state) => state.setTravelDate);
   const selectedSeats = useBookingStore((state) => state.selectedSeats);
+  const travelDate = normalizeTravelDate(searchParams.get("date"));
 
   const [trip, setTripData] = useState<Trip | null>(null);
   const [seats, setSeats] = useState<Seat[]>([]);
@@ -31,12 +35,13 @@ export default function SeatPage() {
 
       const [foundTrip, foundSeats] = await Promise.all([
         getTripById(params.tripId),
-        getSeats(params.tripId),
+        getSeats(params.tripId, travelDate),
       ]);
 
       if (foundTrip) {
         setTripData(foundTrip);
         setTripInStore(foundTrip);
+        setTravelDate(travelDate);
       }
 
       setSeats(foundSeats);
@@ -44,7 +49,7 @@ export default function SeatPage() {
     }
 
     load();
-  }, [params?.tripId, setTripInStore]);
+  }, [params?.tripId, setTripInStore, setTravelDate, travelDate]);
 
   if (loading) {
     return (
@@ -72,7 +77,7 @@ export default function SeatPage() {
         </h1>
 
         <p className="mt-2 text-sm lg:text-base text-slate-600">
-          {trip.routeLabel} · {trip.departureTime} departure
+          {trip.routeLabel} · {travelDate} · {trip.departureTime} departure
         </p>
 
         <div className="mt-6">

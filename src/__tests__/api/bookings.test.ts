@@ -93,10 +93,13 @@ describe("GET /api/bookings", () => {
 // ─── GET /api/bookings/[bookingId] ────────────────────────────────────────────
 
 describe("GET /api/bookings/[bookingId]", () => {
-  it("returns 401 when no token is provided", async () => {
+  it("guest confirmation links can fetch guest bookings without a token", async () => {
     const booking = await createBooking(null);
     const res = await getOne(rGet(`/api/bookings/${booking.id}`), params(booking.id));
-    expect(res.status).toBe(401);
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.id).toBe(booking.id);
   });
 
   it("owner can fetch their own booking", async () => {
@@ -146,7 +149,7 @@ describe("GET /api/bookings/[bookingId]", () => {
     expect(res.status).toBe(200);
   });
 
-  it("non-admin cannot access guest bookings (userId null)", async () => {
+  it("authenticated customers can open guest confirmation links", async () => {
     const { token } = await createUser();
     const booking = await createBooking(null); // guest booking, userId = null
 
@@ -154,8 +157,7 @@ describe("GET /api/bookings/[bookingId]", () => {
       rGet(`/api/bookings/${booking.id}`, token),
       params(booking.id)
     );
-    // userId is null, so it won't match the authenticated user's id
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(200);
   });
 
   it("returns 404 for a non-existent booking ID", async () => {

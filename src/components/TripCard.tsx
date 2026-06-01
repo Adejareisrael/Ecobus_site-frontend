@@ -10,23 +10,27 @@ import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { useBookingStore } from "@/store/booking-store";
 import { getSeats } from "@/lib/api";
+import { normalizeTravelDate } from "@/lib/travel-date";
 
 type Props = {
   trip: Trip;
+  travelDate?: string;
 };
 
-export function TripCard({ trip }: Props) {
+export function TripCard({ trip, travelDate }: Props) {
   const setTrip = useBookingStore((state) => state.setTrip);
+  const setTravelDate = useBookingStore((state) => state.setTravelDate);
   const [availableSeats, setAvailableSeats] = useState<number | null>(null);
+  const date = normalizeTravelDate(travelDate);
 
   useEffect(() => {
     async function loadSeats() {
-      const seats: Seat[] = await getSeats(trip.id);
+      const seats: Seat[] = await getSeats(trip.id, date);
       setAvailableSeats(seats.filter((s) => s.isAvailable).length);
     }
 
     loadSeats();
-  }, [trip.id]);
+  }, [date, trip.id]);
 
   return (
     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.15 }}>
@@ -64,7 +68,13 @@ export function TripCard({ trip }: Props) {
 
         {/* BUTTON */}
         <div className="mt-5 flex">
-          <Link href={`/seats/${trip.id}`} onClick={() => setTrip(trip)}>
+          <Link
+            href={`/seats/${trip.id}?date=${encodeURIComponent(date)}`}
+            onClick={() => {
+              setTrip(trip);
+              setTravelDate(date);
+            }}
+          >
             <Button className="w-full md:w-auto">
               Choose seats
             </Button>

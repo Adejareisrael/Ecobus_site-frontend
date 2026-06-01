@@ -32,10 +32,10 @@ export default function AdminLayout({
     }
   }, [user, router]);
 
-  // close mobile menu on route change
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+    if (!open) return;
+    queueMicrotask(() => setOpen(false));
+  }, [pathname, open]);
 
   const isActive = (path: string) => pathname === path;
 

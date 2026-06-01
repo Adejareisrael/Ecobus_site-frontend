@@ -32,3 +32,8 @@ export function getBookingTotal(
 
   return safePrice * safeSeats;
 }
+
+export function getDiscountedTotal(total: number, discountAmount?: number | null) {
+  const safeDiscount = typeof discountAmount === "number" ? discountAmount : 0;
+  return Math.max(0, total - safeDiscount);
+}

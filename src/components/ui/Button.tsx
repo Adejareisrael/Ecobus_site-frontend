@@ -19,7 +19,7 @@ export function Button({
       "bg-ecobus-purple text-white hover:opacity-90",
 
     ghost:
-      "bg-transparent text-ecobus-dark hover:bg-ecobus-light",
+      "bg-transparent text-ecobus-dark hover:bg-ecobus-light dark:text-slate-100 dark:hover:bg-slate-800",
   };
 
   return (

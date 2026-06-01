@@ -60,9 +60,10 @@ export async function createBooking(userId: string | null, paystackRef?: string)
       reference: `ECO-${crypto.randomUUID()}`,
       paystackRef: paystackRef ?? `ps-ref-${crypto.randomUUID()}`,
       tripId: "trip-1",
+      travelDate: "2026-05-27",
       routeLabel: "Lagos → Abuja",
       departureTime: "08:00 AM",
-      busType: "AC",
+      busType: "Toyota",
       price: 5000,
       seatsJson: JSON.stringify(["A1", "A2"]),
       passengerName: "John Doe",
@@ -81,7 +82,7 @@ export const TEST_TRIP = {
   routeLabel: "Lagos → Abuja",
   departureTime: "08:00 AM",
   arrivalTime: "03:00 PM",
-  busType: "AC" as const,
+  busType: "Toyota" as const,
   price: 5000,
   availableSeats: 10,
   departureTerminalId: "terminal-1",
@@ -95,6 +96,8 @@ export const TEST_PASSENGER = {
   phone: "08012345678",
   email: "john@test.com",
 };
+
+export const TEST_TRAVEL_DATE = "2026-05-27";
 
 // 2 seats × ₦5000 × 100 kobo = 1,000,000
 export const EXPECTED_KOBO = TEST_TRIP.price * TEST_SEATS.length * 100;
