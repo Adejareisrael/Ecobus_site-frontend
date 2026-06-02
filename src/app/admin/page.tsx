@@ -240,7 +240,7 @@ export default function AdminPage() {
             </label>
 
             <label className="grid gap-1 text-xs font-medium text-slate-500">
-              Brand highlight
+              Brand name
               <Input
                 value={settings.heroBrand}
                 onChange={(event) =>

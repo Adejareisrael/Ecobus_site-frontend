@@ -8,12 +8,16 @@ import { Menu, X } from "lucide-react";
 import { Button } from "./ui/Button";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuthStore } from "@/store/auth-store";
-
-import Image from "next/image";
-
+import { BrandWordmark } from "./BrandWordmark";
+import {
+  defaultSiteSettings,
+  SITE_SETTINGS_STORAGE_KEY,
+  SiteSettings,
+} from "@/lib/site-settings-storage";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
 
   const pathname = usePathname();
   const previousPathname = useRef(pathname);
@@ -59,6 +63,23 @@ export function Navbar() {
   );
 
   useEffect(() => {
+    async function loadSettings() {
+      const res = await fetch("/api/site-settings", { cache: "no-store" });
+      if (res.ok) setSettings((await res.json()) as SiteSettings);
+    }
+
+    void loadSettings();
+
+    const handleSettingsChange = async (event: StorageEvent) => {
+      if (event.key && event.key !== SITE_SETTINGS_STORAGE_KEY) return;
+      await loadSettings();
+    };
+
+    window.addEventListener("storage", handleSettingsChange);
+    return () => window.removeEventListener("storage", handleSettingsChange);
+  }, []);
+
+  useEffect(() => {
     if (previousPathname.current !== pathname) {
       previousPathname.current = pathname;
       closeMenu();
@@ -87,27 +108,21 @@ export function Navbar() {
     <>
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-xl shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-4">
 
-          {/* LOGO */}
+          {/* BRAND */}
           <Link
             href="/"
-            className={`flex items-center transition duration-200 ${
+            aria-label={`${settings.heroBrand} home`}
+            className={`min-w-0 transition duration-200 ${
               open ? "opacity-25 blur-sm" : "opacity-100 blur-0"
             }`}
           >
-            <Image
-              src="/ecobus-logo.jpg"
-              alt="Ecobus Logo"
-              width={40}
-              height={40}
-              className="h-10 w-auto object-contain transition hover:scale-105"
-              priority
-            />
+            <BrandWordmark name={settings.heroBrand} className="text-xl" />
           </Link>
 
           {/* DESKTOP NAV */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <nav className="hidden md:flex items-center justify-center gap-6 text-sm font-medium">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -126,7 +141,7 @@ export function Navbar() {
           </nav>
 
           {/* DESKTOP ACTIONS */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center justify-end gap-3">
             <ThemeToggle />
 
             {!hydrated ? (
@@ -172,15 +187,13 @@ export function Navbar() {
         <aside className="fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-white shadow-2xl">
           {/* HEADER */}
           <div className="flex items-center justify-between border-b px-5 py-4">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/ecobus-logo.jpg"
-                alt="Ecobus Logo"
-                width={32}
-                height={32}
-                className="h-8 w-auto object-contain"
-              />
-            </div>
+            <Link
+              href="/"
+              onClick={closeMenu}
+              aria-label={`${settings.heroBrand} home`}
+            >
+              <BrandWordmark name={settings.heroBrand} className="text-lg" />
+            </Link>
 
             <button
               onClick={closeMenu}

@@ -59,12 +59,12 @@ export function SearchForm({
         handleSearch(event.currentTarget);
       }}
       className="
-        grid gap-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-100
+        grid w-full min-w-0 gap-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-100
         grid-cols-1
         md:grid-cols-[1.2fr_auto_1.2fr_1fr_auto]
       "
     >
-      <label className="grid gap-1 text-xs font-medium text-slate-500">
+      <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
         From
         <Select name="from" value={from} onChange={(e) => setFrom(e.target.value)}>
           <option value="">Select terminal</option>
@@ -89,7 +89,7 @@ export function SearchForm({
         </button>
       </div>
 
-      <label className="grid gap-1 text-xs font-medium text-slate-500">
+      <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
         To
         <Select name="to" value={to} onChange={(e) => setTo(e.target.value)}>
           <option value="">Select terminal</option>
@@ -101,7 +101,7 @@ export function SearchForm({
         </Select>
       </label>
 
-      <label className="grid gap-1 text-xs font-medium text-slate-500">
+      <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
         Date
         <Input
           type="date"

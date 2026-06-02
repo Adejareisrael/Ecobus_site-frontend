@@ -8,6 +8,7 @@ import {
   SiteSettings,
 } from "@/lib/site-settings-storage";
 import { useAuthStore } from "@/store/auth-store";
+import { BrandWordmark } from "./BrandWordmark";
 
 export function Footer() {
   const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
@@ -50,9 +51,7 @@ export function Footer() {
 
           {/* BRAND */}
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
-              Ecobus
-            </h2>
+            <BrandWordmark name={settings.heroBrand} className="text-lg" />
             <p className="mt-2 text-sm text-slate-500">
               {settings.footerDescription}
             </p>
@@ -180,7 +179,7 @@ export function Footer() {
 
         {/* BOTTOM BAR */}
         <div className="mt-10 border-t pt-6 text-xs text-slate-500 flex flex-col gap-2 md:flex-row md:justify-between">
-          <p>© {new Date().getFullYear()} Ecobus. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {settings.heroBrand}. All rights reserved.</p>
           <p>{settings.bottomNote}</p>
         </div>
 
