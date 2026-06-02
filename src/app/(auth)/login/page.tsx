@@ -83,6 +83,12 @@ export default function LoginPage() {
         </button>
       </div>
 
+      <div className="text-right">
+        <Link href="/forgot-password" className="text-sm font-medium text-ecobus-purple">
+          Forgot password?
+        </Link>
+      </div>
+
       <Button
         className="w-full bg-ecobus-red text-white"
         onClick={handleLogin}
