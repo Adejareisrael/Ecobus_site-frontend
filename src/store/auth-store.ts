@@ -7,6 +7,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   role: Role;
 };
 
@@ -15,6 +16,7 @@ type AuthState = {
   token: string | null;
   hydrated: boolean;
   login: (user: User, token: string) => void;
+  updateUser: (user: User) => void;
   logout: () => void;
   setHydrated: (hydrated: boolean) => void;
 };
@@ -27,6 +29,7 @@ export const useAuthStore = create<AuthState>()(
       hydrated: false,
 
       login: (user: User, token: string) => set({ user, token }),
+      updateUser: (user: User) => set({ user }),
 
       logout: () => set({ user: null, token: null }),
 

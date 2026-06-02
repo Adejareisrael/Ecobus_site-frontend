@@ -58,11 +58,23 @@ describe("customer booking lookup", () => {
     const data = await res.json();
 
     expect(res.status).toBe(200);
-    expect(data.id).toBe(booking.id);
-    expect(data.seats).toEqual(["A1", "A2"]);
+    expect(data.bookings[0].id).toBe(booking.id);
+    expect(data.bookings[0].seats).toEqual(["A1", "A2"]);
   });
 
-  it("rejects lookup without both reference and contact", async () => {
+  it("finds a booking by passenger contact only", async () => {
+    const booking = await createBooking(null);
+
+    const res = await lookupBooking(
+      rGet("/api/bookings/lookup?contact=john@test.com")
+    );
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.bookings.map((item: { id: string }) => item.id)).toContain(booking.id);
+  });
+
+  it("rejects guest lookup without passenger contact", async () => {
     const res = await lookupBooking(rGet("/api/bookings/lookup?reference=ECO-123"));
     expect(res.status).toBe(400);
   });

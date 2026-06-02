@@ -22,7 +22,6 @@ export function Navbar() {
   const user = useAuthStore((s) => s.user);
   const hydrated = useAuthStore((s) => s.hydrated);
   const logout = useAuthStore((s) => s.logout);
-  const isLoggedIn = hydrated && Boolean(user);
 
   const closeMenu = useCallback(() => setOpen(false), []);
   const toggleMenu = useCallback(() => setOpen((prev) => !prev), []);
@@ -46,7 +45,7 @@ export function Navbar() {
         { label: "Find booking", href: "/lookup" },
       ];
 
-      if (isLoggedIn) {
+      if (hydrated && user?.role === "admin") {
         items.push({ label: "Verify ticket", href: "/ticket/verify" });
       }
 
@@ -56,7 +55,7 @@ export function Navbar() {
 
       return items;
     },
-    [hydrated, isLoggedIn, user?.role]
+    [hydrated, user?.role]
   );
 
   useEffect(() => {

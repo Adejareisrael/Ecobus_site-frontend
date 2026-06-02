@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Booking } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
@@ -8,20 +8,40 @@ import { formatNaira, getBookingTotal } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth-store";
+import { Input } from "@/components/ui/Input";
+import { phoneInput } from "@/lib/form-input";
 
 export default function DashboardPage() {
   const router = useRouter();
 
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
+  const login = useAuthStore((s) => s.login);
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
+  const [profileError, setProfileError] = useState("");
 
   useEffect(() => {
     if (!user) {
       router.replace("/login");
+      return;
     }
+
+    queueMicrotask(() => {
+      setProfile({
+        name: user.name,
+        email: user.email,
+        phone: user.phone ?? "",
+      });
+    });
   }, [user, router]);
 
   useEffect(() => {
@@ -48,6 +68,43 @@ export default function DashboardPage() {
   const activeTrips = bookings.filter(
     (b) => b.status === "Confirmed"
   ).length;
+
+  const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!token) return;
+
+    setProfileSaving(true);
+    setProfileMessage("");
+    setProfileError("");
+
+    try {
+      const res = await fetch("/api/users/me", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(profile),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setProfileError((data as { error?: string }).error ?? "Could not save profile.");
+        return;
+      }
+
+      const updated = data as {
+        user: NonNullable<typeof user>;
+        token: string;
+      };
+      login(updated.user, updated.token);
+      setProfileMessage("Profile saved.");
+    } catch {
+      setProfileError("Something went wrong. Please try again.");
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -102,6 +159,68 @@ export default function DashboardPage() {
         </Card>
 
       </div>
+
+      <Card className="p-5 sm:p-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-slate-900">Profile</h2>
+          <p className="text-sm text-slate-500">
+            Correct your account details if there was a mistake during signup.
+          </p>
+        </div>
+
+        <form onSubmit={handleProfileSubmit} className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_auto]">
+          <label className="grid gap-1 text-xs font-medium text-slate-500">
+            Full name
+            <Input
+              value={profile.name}
+              onChange={(event) =>
+                setProfile((current) => ({ ...current, name: event.target.value }))
+              }
+              required
+            />
+          </label>
+
+          <label className="grid gap-1 text-xs font-medium text-slate-500">
+            Email
+            <Input
+              type="email"
+              value={profile.email}
+              onChange={(event) =>
+                setProfile((current) => ({ ...current, email: event.target.value }))
+              }
+              required
+            />
+          </label>
+
+          <label className="grid gap-1 text-xs font-medium text-slate-500">
+            Phone
+            <Input
+              type="tel"
+              inputMode="tel"
+              value={profile.phone}
+              onChange={(event) =>
+                setProfile((current) => ({
+                  ...current,
+                  phone: phoneInput(event.target.value),
+                }))
+              }
+            />
+          </label>
+
+          <div className="flex items-end">
+            <Button type="submit" className="w-full" disabled={profileSaving}>
+              {profileSaving ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </form>
+
+        {profileMessage && (
+          <p className="mt-3 text-sm text-emerald-600">{profileMessage}</p>
+        )}
+        {profileError && (
+          <p className="mt-3 text-sm text-red-600">{profileError}</p>
+        )}
+      </Card>
 
       {/* BOOKINGS LIST */}
       <div className="space-y-4">
