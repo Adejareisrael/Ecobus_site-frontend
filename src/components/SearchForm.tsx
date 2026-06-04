@@ -60,6 +60,7 @@ export function SearchForm({
       }}
       className="
         grid w-full min-w-0 gap-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-100
+        dark:border dark:border-sky-900/50 dark:bg-[#0d1a2e]/95 dark:shadow-[0_24px_70px_rgb(0_0_0_/_0.32)] dark:ring-sky-800/40
         grid-cols-1
         md:grid-cols-[1.2fr_auto_1.2fr_1fr_auto]
       "
@@ -83,7 +84,7 @@ export function SearchForm({
           disabled={!from && !to}
           aria-label="Swap route"
           title="Swap route"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-ecobus-red hover:text-ecobus-red disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-ecobus-red hover:text-ecobus-red disabled:cursor-not-allowed disabled:opacity-40 dark:border-sky-900/60 dark:bg-slate-950/25 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-300"
         >
           <ArrowLeftRight className="h-4 w-4" />
         </button>
@@ -112,7 +113,7 @@ export function SearchForm({
         />
       </label>
 
-      <Button className="h-12 w-full self-end gap-2" type="submit">
+      <Button className="h-12 w-full self-end gap-2 dark:bg-sky-500 dark:hover:bg-sky-400" type="submit">
         <Search className="h-4 w-4" />
         Search
       </Button>

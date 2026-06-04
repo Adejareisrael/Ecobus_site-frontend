@@ -2,19 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/auth";
+import { checkRateLimit, getClientKey } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const rate = checkRateLimit(getClientKey("login", req, normalizedEmail), {
+      limit: 8,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (rate.limited) {
+      return NextResponse.json(
+        { error: "Too many login attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return NextResponse.json(

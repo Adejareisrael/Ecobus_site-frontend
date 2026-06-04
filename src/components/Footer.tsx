@@ -44,14 +44,14 @@ export function Footer() {
   const xUrl = settings.xUrl || `https://x.com/${settings.xHandle.replace("@", "")}`;
 
   return (
-    <footer className="border-t border-slate-200 bg-slate-50">
+    <footer className="border-t border-slate-200 bg-slate-50 dark:border-sky-900/50 dark:bg-[#081426]">
       <div className="mx-auto max-w-7xl px-4 py-10">
 
         <div className="grid gap-8 md:grid-cols-3">
 
           {/* BRAND */}
           <div>
-            <BrandWordmark name={settings.heroBrand} className="text-lg" />
+            <BrandWordmark name={settings.heroBrand} className="h-8" />
             <p className="mt-2 text-sm text-slate-500">
               {settings.footerDescription}
             </p>
@@ -62,48 +62,48 @@ export function Footer() {
             <p className="font-semibold text-slate-900">Quick Links</p>
             <ul className="mt-3 space-y-2 text-slate-500">
               <li>
-                <a href="/search" className="hover:text-ecobus-red">
+                <a href="/search" className="hover:text-ecobus-red dark:hover:text-sky-300">
                   Book a trip
                 </a>
               </li>
               {isCustomer && (
                 <li>
-                  <a href="/dashboard" className="hover:text-ecobus-purple">
+                  <a href="/dashboard" className="hover:text-ecobus-purple dark:hover:text-cyan-300">
                     Dashboard
                   </a>
                 </li>
               )}
               {isAdmin && (
                 <li>
-                  <a href="/admin" className="hover:text-ecobus-purple">
+                  <a href="/admin" className="hover:text-ecobus-purple dark:hover:text-cyan-300">
                     Admin dashboard
                   </a>
                 </li>
               )}
               {hydrated && !user && (
                 <li>
-                  <a href="/login" className="hover:text-ecobus-red">
+                  <a href="/login" className="hover:text-ecobus-red dark:hover:text-sky-300">
                     Login
                   </a>
                 </li>
               )}
               <li>
-                <a href="/lookup" className="hover:text-ecobus-red">
+                <a href="/lookup" className="hover:text-ecobus-red dark:hover:text-sky-300">
                   Find booking
                 </a>
               </li>
               <li>
-                <a href="/privacy" className="hover:text-ecobus-red">
+                <a href="/privacy" className="hover:text-ecobus-red dark:hover:text-sky-300">
                   Privacy
                 </a>
               </li>
               <li>
-                <a href="/terms" className="hover:text-ecobus-red">
+                <a href="/terms" className="hover:text-ecobus-red dark:hover:text-sky-300">
                   Terms
                 </a>
               </li>
               <li>
-                <a href="/refund-policy" className="hover:text-ecobus-red">
+                <a href="/refund-policy" className="hover:text-ecobus-red dark:hover:text-sky-300">
                   Refund policy
                 </a>
               </li>
@@ -138,7 +138,7 @@ export function Footer() {
                 href={`mailto:${settings.email}`}
                 aria-label="Email Ecobus"
                 title="Email"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-ecobus-red hover:text-ecobus-red"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-ecobus-red hover:text-ecobus-red dark:border-sky-900/60 dark:bg-slate-950/25 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-300"
               >
                 <Mail className="h-4 w-4" />
               </a>
@@ -148,7 +148,7 @@ export function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Ecobus on Facebook"
                 title="Facebook"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-ecobus-red hover:text-ecobus-red"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-ecobus-red hover:text-ecobus-red dark:border-sky-900/60 dark:bg-slate-950/25 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-300"
               >
                 <FacebookIcon />
               </a>
@@ -158,7 +158,7 @@ export function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Ecobus on Instagram"
                 title="Instagram"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-ecobus-red hover:text-ecobus-red"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-ecobus-red hover:text-ecobus-red dark:border-sky-900/60 dark:bg-slate-950/25 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-300"
               >
                 <InstagramIcon />
               </a>
@@ -168,7 +168,7 @@ export function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Ecobus on X"
                 title="X"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-ecobus-red hover:text-ecobus-red"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-ecobus-red hover:text-ecobus-red dark:border-sky-900/60 dark:bg-slate-950/25 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-300"
               >
                 <XIcon />
               </a>
@@ -178,7 +178,7 @@ export function Footer() {
         </div>
 
         {/* BOTTOM BAR */}
-        <div className="mt-10 border-t pt-6 text-xs text-slate-500 flex flex-col gap-2 md:flex-row md:justify-between">
+        <div className="mt-10 border-t pt-6 text-xs text-slate-500 flex flex-col gap-2 dark:border-sky-900/50 md:flex-row md:justify-between">
           <p>© {new Date().getFullYear()} {settings.heroBrand}. All rights reserved.</p>
           <p>{settings.bottomNote}</p>
         </div>

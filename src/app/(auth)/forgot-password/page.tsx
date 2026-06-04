@@ -10,6 +10,7 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [resetUrl, setResetUrl] = useState("");
 
   const handleSubmit = async () => {
     if (!email.trim()) return;
@@ -17,6 +18,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setMessage("");
     setError("");
+    setResetUrl("");
 
     try {
       const res = await fetch("/api/auth/forgot-password", {
@@ -35,6 +37,7 @@ export default function ForgotPasswordPage() {
         (data as { message?: string }).message ??
           "If an account exists, reset instructions will be sent."
       );
+      setResetUrl((data as { resetUrl?: string }).resetUrl ?? "");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -52,9 +55,14 @@ export default function ForgotPasswordPage() {
       </div>
 
       {message && (
-        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-600">
-          {message}
-        </p>
+        <div className="space-y-2 rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-600">
+          <p>{message}</p>
+          {resetUrl && (
+            <Link href={resetUrl} className="block font-medium underline">
+              Open local reset link
+            </Link>
+          )}
+        </div>
       )}
 
       {error && (

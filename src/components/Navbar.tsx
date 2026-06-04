@@ -107,7 +107,7 @@ export function Navbar() {
   return (
     <>
       {/* HEADER */}
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-xl shadow-sm">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 shadow-sm backdrop-blur-xl dark:border-sky-900/50 dark:bg-[#081426]/90">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-4">
 
           {/* BRAND */}
@@ -118,7 +118,7 @@ export function Navbar() {
               open ? "opacity-25 blur-sm" : "opacity-100 blur-0"
             }`}
           >
-            <BrandWordmark name={settings.heroBrand} className="text-xl" />
+            <BrandWordmark name={settings.heroBrand} className="h-11" />
           </Link>
 
           {/* DESKTOP NAV */}
@@ -132,7 +132,7 @@ export function Navbar() {
                     ? item.href === "/dashboard"
                       ? "text-ecobus-purple"
                       : "text-ecobus-red"
-                    : "text-slate-600 hover:text-ecobus-red"
+                    : "text-slate-600 hover:text-ecobus-red dark:text-slate-300 dark:hover:text-sky-300"
                 }`}
               >
                 {item.label}
@@ -157,7 +157,7 @@ export function Navbar() {
             )}
 
             <Link href="/search">
-              <Button className="bg-ecobus-red text-white hover:opacity-90">
+              <Button className="bg-ecobus-red text-white hover:opacity-90 dark:bg-sky-500 dark:hover:bg-sky-400">
                 Book now
               </Button>
             </Link>
@@ -167,7 +167,7 @@ export function Navbar() {
           <button
             onClick={toggleMenu}
             aria-label="Toggle menu"
-            className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition"
+            className="rounded-lg p-2 transition hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-slate-800 md:hidden"
           >
             {open ? <X /> : <Menu />}
           </button>
@@ -184,21 +184,21 @@ export function Navbar() {
 
       {/* MOBILE DRAWER */}
       {open && (
-        <aside className="fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-white shadow-2xl">
+        <aside className="fixed top-0 right-0 z-50 h-full w-[85%] max-w-sm bg-white shadow-2xl dark:border-l dark:border-sky-900/50 dark:bg-[#0b1729]">
           {/* HEADER */}
-          <div className="flex items-center justify-between border-b px-5 py-4">
+          <div className="flex items-center justify-between border-b px-5 py-4 dark:border-sky-900/50">
             <Link
               href="/"
               onClick={closeMenu}
               aria-label={`${settings.heroBrand} home`}
             >
-              <BrandWordmark name={settings.heroBrand} className="text-lg" />
+              <BrandWordmark name={settings.heroBrand} className="h-10" />
             </Link>
 
             <button
               onClick={closeMenu}
               aria-label="Close menu"
-              className="rounded-lg p-2 transition hover:bg-slate-100"
+              className="rounded-lg p-2 transition hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-slate-800"
             >
               <X />
             </button>
@@ -213,19 +213,19 @@ export function Navbar() {
                 onClick={closeMenu}
                 className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition ${
                   isActive(item.href)
-                    ? "bg-ecobus-light text-ecobus-red"
-                    : "hover:bg-slate-50"
+                    ? "bg-ecobus-light text-ecobus-red dark:bg-sky-500/15 dark:text-sky-200"
+                    : "hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/80"
                 }`}
               >
                 <span>{item.label}</span>
-                <span className="text-slate-400">→</span>
+                <span className="text-slate-400 dark:text-sky-400">→</span>
               </Link>
             ))}
           </div>
 
           {/* ACCOUNT */}
-          <div className="px-5 mt-4 border-t pt-4">
-            <div className="mb-3 flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
+          <div className="px-5 mt-4 border-t pt-4 dark:border-sky-900/50">
+            <div className="mb-3 flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 dark:border-sky-900/60 dark:bg-slate-950/25">
               <span className="text-sm font-medium">Theme</span>
               <ThemeToggle />
             </div>
