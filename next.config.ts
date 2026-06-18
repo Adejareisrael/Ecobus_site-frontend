@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
               "default-src 'self';",
               scriptSrc,
               "style-src 'self' 'unsafe-inline';",
-              "img-src 'self' data: blob:;",
+              "img-src 'self' data: blob: https:;",
               "connect-src 'self' https://api.paystack.co;",
               "frame-ancestors 'none';",
               "base-uri 'self';",

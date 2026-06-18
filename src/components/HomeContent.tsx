@@ -80,16 +80,60 @@ export function HomeContent({ terminals, initialSettings }: Props) {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {settings.popularRoutes.map((route) => (
-            <Card
-              key={route}
-              className="p-5 hover:shadow-md transition cursor-pointer"
-            >
-              <p className="text-xs text-slate-500">Popular route</p>
-              <h3 className="mt-2 text-base sm:text-lg font-semibold">
-                {route}
-              </h3>
-            </Card>
+          {settings.popularRoutes.map((route, index) => {
+            const routeImage =
+              settings.popularRouteImages[index] ||
+              initialSettings.popularRouteImages[index] ||
+              "/route-lagos-benin.jpg";
+
+            return (
+              <Link key={`${route}-${index}`} href="/search" className="group">
+                <article className="relative min-h-[220px] overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- Admins can configure local or external route images. */}
+                  <img
+                    src={routeImage}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+                  <div className="relative flex h-full min-h-[220px] flex-col justify-end p-5 text-white">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100">
+                      Popular route
+                    </p>
+                    <h3 className="mt-2 text-lg font-semibold leading-snug">
+                      {route}
+                    </h3>
+                    <span className="mt-4 text-sm font-medium text-sky-100">
+                      View trips
+                    </span>
+                  </div>
+                </article>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <div className="flex items-end justify-between">
+          <h2 className="text-xl sm:text-2xl font-semibold">Terminals</h2>
+          <Link href="/search" className="text-sm font-medium text-ecobus-red">
+            Find trips
+          </Link>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {terminals.slice(0, 6).map((terminal) => (
+            <Link key={terminal.id} href={`/terminals/${terminal.id}`}>
+              <Card className="h-full p-5 transition hover:shadow-md">
+                <p className="text-xs text-slate-500">{terminal.city}, {terminal.state}</p>
+                <h3 className="mt-2 text-lg font-semibold">{terminal.name}</h3>
+                <p className="mt-2 text-sm text-slate-500">
+                  {terminal.address || "View terminal details and departures."}
+                </p>
+              </Card>
+            </Link>
           ))}
         </div>
       </section>

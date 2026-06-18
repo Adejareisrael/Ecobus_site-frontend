@@ -2,6 +2,16 @@ import { prisma } from "./prisma";
 import { defaultSiteSettings, SiteSettings } from "./site-settings-storage";
 import { Terminal, Trip } from "./types";
 
+function parseStringArray(value: string | null | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
 type DbTrip = {
   id: string;
   departureTerminalId: string;
@@ -13,6 +23,7 @@ type DbTrip = {
   availableSeats: number;
   busType: string;
   busLayoutId: string | null;
+  amenitiesJson?: string | null;
   isActive: boolean;
 };
 
@@ -24,6 +35,7 @@ type DbSettings = {
   heroCardTitle: string;
   heroCardDescription: string;
   popularRoutesJson: string;
+  popularRouteImagesJson?: string | null;
   footerDescription: string;
   supportText: string;
   whatsappNumber: string;
@@ -51,12 +63,14 @@ export function formatTrip(trip: DbTrip): Trip {
     availableSeats: trip.availableSeats,
     busType: trip.busType as Trip["busType"],
     busLayoutId: trip.busLayoutId,
+    amenities: parseStringArray(trip.amenitiesJson),
     isActive: trip.isActive,
   };
 }
 
 export function formatSettings(settings: DbSettings | null): SiteSettings {
   if (!settings) return defaultSiteSettings;
+  const popularRouteImages = parseStringArray(settings.popularRouteImagesJson);
 
   return {
     heroTitlePrefix: settings.heroTitlePrefix,
@@ -66,6 +80,9 @@ export function formatSettings(settings: DbSettings | null): SiteSettings {
     heroCardTitle: settings.heroCardTitle,
     heroCardDescription: settings.heroCardDescription,
     popularRoutes: JSON.parse(settings.popularRoutesJson) as string[],
+    popularRouteImages: popularRouteImages.length
+      ? popularRouteImages
+      : defaultSiteSettings.popularRouteImages,
     footerDescription: settings.footerDescription,
     supportText: settings.supportText,
     whatsappNumber: settings.whatsappNumber,
@@ -83,7 +100,24 @@ export function formatSettings(settings: DbSettings | null): SiteSettings {
 }
 
 export async function getDbTerminals(): Promise<Terminal[]> {
-  return prisma.terminal.findMany({ orderBy: [{ city: "asc" }, { name: "asc" }] });
+  const terminals = await prisma.terminal.findMany({
+    orderBy: [{ city: "asc" }, { name: "asc" }],
+  });
+
+  return terminals.map((terminal) => ({
+    ...terminal,
+    facilities: parseStringArray(terminal.facilitiesJson),
+  }));
+}
+
+export async function getDbTerminalById(terminalId: string): Promise<Terminal | null> {
+  const terminal = await prisma.terminal.findUnique({ where: { id: terminalId } });
+  if (!terminal) return null;
+
+  return {
+    ...terminal,
+    facilities: parseStringArray(terminal.facilitiesJson),
+  };
 }
 
 export async function getDbTrips(params: {
@@ -114,9 +148,10 @@ export async function getDbSiteSettings(): Promise<SiteSettings> {
 }
 
 export function settingsToDbInput(settings: SiteSettings) {
-  const { popularRoutes, ...fields } = settings;
+  const { popularRoutes, popularRouteImages, ...fields } = settings;
   return {
     ...fields,
     popularRoutesJson: JSON.stringify(popularRoutes),
+    popularRouteImagesJson: JSON.stringify(popularRouteImages),
   };
 }

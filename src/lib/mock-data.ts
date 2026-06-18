@@ -22,6 +22,7 @@ export const trips: Trip[] = [
 
     busType: "Toyota",
     busLayoutId: toyotaLayoutId,
+    amenities: ["AC", "USB charging", "14 seats", "Luggage space"],
 
     routeLabel: "Lagos Fadeyi -> Benin Idokpa",
   },
@@ -38,6 +39,7 @@ export const trips: Trip[] = [
     availableSeats: 9,
 
     busType: "Executive",
+    amenities: ["AC", "Extra legroom", "Luggage space"],
 
     routeLabel: "Lagos Ajah -> Onitsha Ukumango",
   },
@@ -54,6 +56,7 @@ export const trips: Trip[] = [
     availableSeats: 24,
 
     busType: "Standard",
+    amenities: ["AC", "Luggage space", "Comfort seats"],
 
     routeLabel: "Benin Ramat Park -> Lagos Fadeyi",
   },
@@ -71,6 +74,7 @@ export const trips: Trip[] = [
 
     busType: "Toyota",
     busLayoutId: toyotaLayoutId,
+    amenities: ["AC", "USB charging", "14 seats", "Luggage space"],
 
     routeLabel: "Onitsha Ukumango -> Lagos Ajah",
   },

@@ -5,15 +5,25 @@ import { TripResults } from "@/components/TripResults";
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; to?: string; date?: string }>;
+  searchParams: Promise<{
+    from?: string;
+    to?: string;
+    date?: string;
+    returnDate?: string;
+    tripType?: string;
+  }>;
 }) {
   const params = await searchParams;
-  const [trips, terminals] = await Promise.all([
+  const isRoundTrip = params.tripType === "round-trip";
+  const [trips, returnTrips, terminals] = await Promise.all([
     getTrips(params),
+    isRoundTrip && params.from && params.to
+      ? getTrips({ from: params.to, to: params.from, date: params.returnDate })
+      : Promise.resolve([]),
     getTerminals(),
   ]);
 
-  const hasFilters = params.from || params.to || params.date;
+  const hasFilters = params.from || params.to || params.date || params.returnDate;
   const terminalName = (id?: string) => {
     const terminal = terminals.find((item) => item.id === id);
     return terminal ? `${terminal.city} - ${terminal.name}` : id;
@@ -53,6 +63,12 @@ export default async function SearchPage({
               </span>
             )}
 
+            {isRoundTrip && params.returnDate && (
+              <span className="px-3 py-1 bg-slate-100 rounded-full">
+                Return: {params.returnDate}
+              </span>
+            )}
+
           </div>
         )}
 
@@ -63,9 +79,31 @@ export default async function SearchPage({
         initialFrom={params.from}
         initialTo={params.to}
         initialDate={params.date}
+        initialReturnDate={params.returnDate}
+        initialTripType={params.tripType}
       />
 
-      <TripResults trips={trips} searchParams={params} />
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Outbound trips</h2>
+        <TripResults trips={trips} searchParams={params} />
+      </section>
+
+      {isRoundTrip && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">Return trips</h2>
+          <p className="text-sm text-slate-500">
+            Choose a return departure after confirming your outbound trip, or book both legs separately for now.
+          </p>
+          <TripResults
+            trips={returnTrips}
+            searchParams={{
+              from: params.to,
+              to: params.from,
+              date: params.returnDate,
+            }}
+          />
+        </section>
+      )}
 
     </div>
   );

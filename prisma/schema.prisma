@@ -53,7 +53,40 @@ model Booking {
   status         String   @default("Confirmed")
   checkedInAt    DateTime?
   checkedInBy    String?
+  changeRequests BookingChangeRequest[]
   createdAt      DateTime @default(now())
+}
+
+model BookingChangeRequest {
+  id             String   @id @default(cuid())
+  bookingId      String
+  booking        Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  userId         String?
+  requestType    String
+  preferredDate  String?
+  reason         String
+  status         String   @default("Pending")
+  adminNote      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model CharterRequest {
+  id           String   @id @default(cuid())
+  fullName     String
+  phone        String
+  email        String?
+  pickup       String
+  destination  String
+  travelDate   String
+  returnDate   String?
+  passengers   Int
+  vehicleType  String?
+  notes        String?
+  status       String   @default("New")
+  adminNote    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model TicketDelivery {
@@ -104,6 +137,7 @@ model Trip {
   busType               String
   busLayoutId           String?
   busLayout             BusLayout? @relation(fields: [busLayoutId], references: [id])
+  amenitiesJson         String    @default("[]")
   isActive              Boolean  @default(true)
 
   createdAt             DateTime @default(now())
@@ -128,6 +162,11 @@ model Terminal {
   name    String
   city    String
   state   String
+  address String @default("")
+  phone   String @default("")
+  hours   String @default("")
+  mapUrl  String @default("")
+  facilitiesJson String @default("[]")
 
   createdAt DateTime @default(now())
 }
@@ -141,6 +180,7 @@ model SiteSettings {
   heroCardTitle       String
   heroCardDescription String
   popularRoutesJson   String
+  popularRouteImagesJson String @default("[]")
   footerDescription   String
   supportText         String
   whatsappNumber      String

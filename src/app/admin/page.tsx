@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
-import { Calendar, RotateCcw, Save, Settings, Ticket } from "lucide-react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { Calendar, ImageUp, RotateCcw, Save, Settings, Ticket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Booking } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
@@ -67,6 +67,54 @@ export default function AdminPage() {
         routeIndex === index ? value : route
       ),
     });
+  };
+
+  const updatePopularRouteImage = (index: number, value: string) => {
+    const routeImages =
+      settings.popularRouteImages.length > settings.popularRoutes.length - 1
+        ? settings.popularRouteImages
+        : settings.popularRoutes.map(
+            (_, routeIndex) =>
+              settings.popularRouteImages[routeIndex] ??
+              defaultSiteSettings.popularRouteImages[routeIndex] ??
+              ""
+          );
+
+    updateSettings({
+      popularRouteImages: routeImages.map((image, imageIndex) =>
+        imageIndex === index ? value : image
+      ),
+    });
+  };
+
+  const handlePopularRouteImageUpload = (
+    index: number,
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setSaveError("Please upload an image file for the route card.");
+      return;
+    }
+
+    if (file.size > 1.5 * 1024 * 1024) {
+      setSaveError("Route images should be smaller than 1.5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        updatePopularRouteImage(index, reader.result);
+      }
+    };
+    reader.onerror = () => {
+      setSaveError("Could not read that image. Please try another file.");
+    };
+    reader.readAsDataURL(file);
+    event.target.value = "";
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -294,13 +342,71 @@ export default function AdminPage() {
             <h3 className="font-semibold">Popular routes</h3>
             <div className="grid gap-3 md:grid-cols-2">
               {settings.popularRoutes.map((route, index) => (
-                <Input
+                <div
                   key={index}
-                  value={route}
-                  onChange={(event) =>
-                    updatePopularRoute(index, event.target.value)
-                  }
-                />
+                  className="grid gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-800"
+                >
+                  <div className="aspect-[16/9] overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- Admins can preview local or external route images. */}
+                    <img
+                      src={
+                        settings.popularRouteImages[index] ||
+                        defaultSiteSettings.popularRouteImages[index] ||
+                        "/route-lagos-benin.jpg"
+                      }
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  <label className="grid gap-1 text-xs font-medium text-slate-500">
+                    Route title
+                    <Input
+                      value={route}
+                      onChange={(event) =>
+                        updatePopularRoute(index, event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <div className="grid gap-2">
+                    <p className="text-xs font-medium text-slate-500">
+                      Route image
+                    </p>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-ecobus-red px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:opacity-90">
+                        <ImageUp className="h-4 w-4" />
+                        Upload image
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={(event) =>
+                            handlePopularRouteImageUpload(index, event)
+                          }
+                        />
+                      </label>
+
+                      <Button
+                        variant="ghost"
+                        className="gap-2"
+                        onClick={() =>
+                          updatePopularRouteImage(
+                            index,
+                            defaultSiteSettings.popularRouteImages[index] ||
+                              defaultSiteSettings.popularRouteImages[0]
+                          )
+                        }
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                        Reset
+                      </Button>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      JPG, PNG, or WEBP. Keep each image under 1.5MB.
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>

@@ -55,6 +55,19 @@ export function TripCard({ trip, travelDate }: Props) {
                 ? `${availableSeats} seats available`
                 : "Loading..."}
             </p>
+
+            {trip.amenities && trip.amenities.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {trip.amenities.slice(0, 4).map((amenity) => (
+                  <span
+                    key={amenity}
+                    className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-sky-500/15 dark:text-sky-200"
+                  >
+                    {amenity}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* RIGHT */}

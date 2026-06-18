@@ -28,6 +28,13 @@ export default function DashboardPage() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
   const [profileError, setProfileError] = useState("");
+  const [changeRequest, setChangeRequest] = useState({
+    bookingId: "",
+    requestType: "Reschedule",
+    preferredDate: "",
+    reason: "",
+  });
+  const [changeMessage, setChangeMessage] = useState("");
 
   useEffect(() => {
     if (!user) {
@@ -103,6 +110,34 @@ export default function DashboardPage() {
       setProfileError("Something went wrong. Please try again.");
     } finally {
       setProfileSaving(false);
+    }
+  };
+
+  const submitChangeRequest = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!token || !changeRequest.bookingId) return;
+
+    setChangeMessage("");
+    const res = await fetch("/api/booking-change-requests", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(changeRequest),
+    });
+
+    if (res.ok) {
+      setChangeMessage("Request sent. Ecobus support will review it.");
+      setChangeRequest({
+        bookingId: "",
+        requestType: "Reschedule",
+        preferredDate: "",
+        reason: "",
+      });
+    } else {
+      const data = (await res.json()) as { error?: string };
+      setChangeMessage(data.error ?? "Could not submit request.");
     }
   };
 
@@ -307,11 +342,75 @@ export default function DashboardPage() {
 
               </div>
 
+              {booking.status === "Confirmed" && (
+                <div className="mt-4 border-t pt-4">
+                  {changeRequest.bookingId === booking.id ? (
+                    <form onSubmit={submitChangeRequest} className="grid gap-3 md:grid-cols-[160px_180px_1fr_auto]">
+                      <select
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                        value={changeRequest.requestType}
+                        onChange={(event) =>
+                          setChangeRequest((current) => ({
+                            ...current,
+                            requestType: event.target.value,
+                          }))
+                        }
+                      >
+                        <option value="Reschedule">Reschedule</option>
+                        <option value="Cancel">Cancel</option>
+                      </select>
+                      {changeRequest.requestType === "Reschedule" ? (
+                        <Input
+                          type="date"
+                          value={changeRequest.preferredDate}
+                          onChange={(event) =>
+                            setChangeRequest((current) => ({
+                              ...current,
+                              preferredDate: event.target.value,
+                            }))
+                          }
+                        />
+                      ) : (
+                        <div className="hidden md:block" />
+                      )}
+                      <Input
+                        placeholder="Reason"
+                        value={changeRequest.reason}
+                        onChange={(event) =>
+                          setChangeRequest((current) => ({
+                            ...current,
+                            reason: event.target.value,
+                          }))
+                        }
+                        required
+                      />
+                      <Button type="submit">Send request</Button>
+                    </form>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        setChangeRequest((current) => ({
+                          ...current,
+                          bookingId: booking.id,
+                        }))
+                      }
+                    >
+                      Reschedule or cancel
+                    </Button>
+                  )}
+                </div>
+              )}
+
             </Card>
           ))
         )}
 
       </div>
+
+      {changeMessage && (
+        <Card className="p-4 text-sm text-slate-600">{changeMessage}</Card>
+      )}
 
     </div>
   );

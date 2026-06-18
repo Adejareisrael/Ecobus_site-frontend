@@ -13,6 +13,11 @@ type TerminalForm = {
   name: string;
   city: string;
   state: string;
+  address: string;
+  phone: string;
+  hours: string;
+  mapUrl: string;
+  facilities: string;
 };
 
 const emptyForm: TerminalForm = {
@@ -20,6 +25,11 @@ const emptyForm: TerminalForm = {
   name: "",
   city: "",
   state: "",
+  address: "",
+  phone: "",
+  hours: "",
+  mapUrl: "",
+  facilities: "",
 };
 
 export default function AdminTerminalsPage() {
@@ -65,6 +75,11 @@ export default function AdminTerminalsPage() {
       name: terminal.name,
       city: terminal.city,
       state: terminal.state,
+      address: terminal.address ?? "",
+      phone: terminal.phone ?? "",
+      hours: terminal.hours ?? "",
+      mapUrl: terminal.mapUrl ?? "",
+      facilities: (terminal.facilities ?? []).join(", "),
     });
     setEditingId(terminal.id);
     setIsFormOpen(true);
@@ -80,6 +95,14 @@ export default function AdminTerminalsPage() {
       name: form.name,
       city: form.city,
       state: form.state,
+      address: form.address,
+      phone: form.phone,
+      hours: form.hours,
+      mapUrl: form.mapUrl,
+      facilities: form.facilities
+        .split(",")
+        .map((facility) => facility.trim())
+        .filter(Boolean),
     };
 
     const res = await fetch(
@@ -217,6 +240,51 @@ export default function AdminTerminalsPage() {
                   required
                 />
               </label>
+
+              <label className="grid gap-1 text-xs font-medium text-slate-500 xl:col-span-2">
+                Address
+                <Input
+                  value={form.address}
+                  onChange={(event) => updateForm({ address: event.target.value })}
+                  placeholder="Fadeyi, Ikorodu Road"
+                />
+              </label>
+
+              <label className="grid gap-1 text-xs font-medium text-slate-500">
+                Phone
+                <Input
+                  value={form.phone}
+                  onChange={(event) => updateForm({ phone: event.target.value })}
+                  placeholder="+234 913 399 4004"
+                />
+              </label>
+
+              <label className="grid gap-1 text-xs font-medium text-slate-500">
+                Hours
+                <Input
+                  value={form.hours}
+                  onChange={(event) => updateForm({ hours: event.target.value })}
+                  placeholder="6:00 AM - 6:00 PM"
+                />
+              </label>
+
+              <label className="grid gap-1 text-xs font-medium text-slate-500 xl:col-span-2">
+                Map URL
+                <Input
+                  value={form.mapUrl}
+                  onChange={(event) => updateForm({ mapUrl: event.target.value })}
+                  placeholder="https://maps.google.com/?q=..."
+                />
+              </label>
+
+              <label className="grid gap-1 text-xs font-medium text-slate-500 xl:col-span-2">
+                Facilities
+                <Input
+                  value={form.facilities}
+                  onChange={(event) => updateForm({ facilities: event.target.value })}
+                  placeholder="Waiting area, Ticket support, Boarding support"
+                />
+              </label>
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -250,6 +318,20 @@ export default function AdminTerminalsPage() {
               <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
                 {terminal.id}
               </p>
+
+              <p className="text-sm text-slate-500">
+                {terminal.address || "No address yet"}
+              </p>
+
+              {terminal.facilities && terminal.facilities.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {terminal.facilities.slice(0, 3).map((facility) => (
+                    <span key={facility} className="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700">
+                      {facility}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               <div className="flex gap-2">
                 <Button

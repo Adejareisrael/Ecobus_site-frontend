@@ -35,6 +35,7 @@ function validateTrip(input: Partial<Trip>) {
     availableSeats,
     busType: input.busType,
     busLayoutId: input.busLayoutId ?? null,
+    amenitiesJson: JSON.stringify(input.amenities ?? []),
     isActive: input.isActive ?? true,
   };
 }

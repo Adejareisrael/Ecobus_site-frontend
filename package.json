@@ -10,6 +10,9 @@
     "lint": "eslint",
     "db:setup": "prisma generate && prisma db push && tsx prisma/seed.ts",
     "db:backup": "tsx scripts/backup-db.ts",
+    "mobile:sync": "cap sync",
+    "mobile:android": "cap open android",
+    "mobile:ios": "cap open ios",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -22,6 +25,10 @@
     "postcss": "$postcss"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
+    "@capacitor/ios": "^8.4.0",
     "@prisma/adapter-better-sqlite3": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@types/qrcode": "^1.5.6",

@@ -6,6 +6,11 @@ function validateTerminal(input: {
   name?: string;
   city?: string;
   state?: string;
+  address?: string;
+  phone?: string;
+  hours?: string;
+  mapUrl?: string;
+  facilities?: string[];
 }) {
   const name = input.name?.trim();
   const city = input.city?.trim();
@@ -15,7 +20,35 @@ function validateTerminal(input: {
     return null;
   }
 
-  return { name, city, state };
+  return {
+    name,
+    city,
+    state,
+    address: input.address?.trim() || "",
+    phone: input.phone?.trim() || "",
+    hours: input.hours?.trim() || "",
+    mapUrl: input.mapUrl?.trim() || "",
+    facilitiesJson: JSON.stringify(
+      Array.isArray(input.facilities) ? input.facilities.map(String) : []
+    ),
+  };
+}
+
+function formatTerminal(terminal: {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  address: string;
+  phone: string;
+  hours: string;
+  mapUrl: string;
+  facilitiesJson: string;
+}) {
+  return {
+    ...terminal,
+    facilities: JSON.parse(terminal.facilitiesJson) as string[],
+  };
 }
 
 export async function PATCH(
@@ -37,7 +70,7 @@ export async function PATCH(
       data: input,
     });
 
-    return NextResponse.json(terminal);
+    return NextResponse.json(formatTerminal(terminal));
   } catch {
     return NextResponse.json({ error: "Terminal could not be updated" }, { status: 500 });
   }

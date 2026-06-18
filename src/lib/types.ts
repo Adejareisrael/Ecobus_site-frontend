@@ -3,6 +3,11 @@ export type Terminal = {
   name: string;
   city: string;
   state: string;
+  address?: string;
+  phone?: string;
+  hours?: string;
+  mapUrl?: string;
+  facilities?: string[];
 };
 
 /**
@@ -24,6 +29,7 @@ export type Trip = {
 
   busType: string;
   busLayoutId?: string | null;
+  amenities?: string[];
   isActive?: boolean;
 
   routeLabel: string;
@@ -91,6 +97,35 @@ export type Booking = {
   status: BookingStatus;
   checkedInAt?: string | null;
   checkedInBy?: string | null;
+};
+
+export type CharterRequest = {
+  id: string;
+  fullName: string;
+  phone: string;
+  email?: string | null;
+  pickup: string;
+  destination: string;
+  travelDate: string;
+  returnDate?: string | null;
+  passengers: number;
+  vehicleType?: string | null;
+  notes?: string | null;
+  status: "New" | "Contacted" | "Quoted" | "Closed";
+  adminNote?: string | null;
+  createdAt: string;
+};
+
+export type BookingChangeRequest = {
+  id: string;
+  bookingId: string;
+  reference?: string;
+  requestType: "Reschedule" | "Cancel";
+  preferredDate?: string | null;
+  reason: string;
+  status: "Pending" | "Approved" | "Rejected";
+  adminNote?: string | null;
+  createdAt: string;
 };
 
 export type PromoCode = {

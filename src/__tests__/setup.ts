@@ -9,7 +9,9 @@ import { resetRateLimitsForTests } from "@/lib/rate-limit";
 beforeEach(async () => {
   resetRateLimitsForTests();
   await prisma.passwordResetToken.deleteMany();
+  await prisma.bookingChangeRequest.deleteMany();
   await prisma.booking.deleteMany();
+  await prisma.charterRequest.deleteMany();
   await prisma.ticketDelivery.deleteMany();
   await prisma.user.deleteMany();
   await prisma.promoCode.deleteMany();
@@ -38,6 +40,7 @@ beforeEach(async () => {
         availableSeats: trip.availableSeats,
         busType: trip.busType,
         busLayoutId: trip.busLayoutId ?? null,
+        amenitiesJson: JSON.stringify(trip.amenities ?? []),
         isActive: trip.isActive ?? true,
       },
       create: {
@@ -51,6 +54,7 @@ beforeEach(async () => {
         availableSeats: trip.availableSeats,
         busType: trip.busType,
         busLayoutId: trip.busLayoutId ?? null,
+        amenitiesJson: JSON.stringify(trip.amenities ?? []),
         isActive: trip.isActive ?? true,
       },
     });
@@ -58,17 +62,19 @@ beforeEach(async () => {
   await prisma.busLayout.deleteMany({
     where: { id: { not: defaultToyotaLayout.id } },
   });
-  const { popularRoutes, ...settings } = defaultSiteSettings;
+  const { popularRoutes, popularRouteImages, ...settings } = defaultSiteSettings;
   await prisma.siteSettings.upsert({
     where: { id: "site" },
     update: {
       ...settings,
       popularRoutesJson: JSON.stringify(popularRoutes),
+      popularRouteImagesJson: JSON.stringify(popularRouteImages),
     },
     create: {
       id: "site",
       ...settings,
       popularRoutesJson: JSON.stringify(popularRoutes),
+      popularRouteImagesJson: JSON.stringify(popularRouteImages),
     },
   });
 });

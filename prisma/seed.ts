@@ -10,7 +10,7 @@ import { busLayoutToDbInput, defaultToyotaLayout } from "../src/lib/bus-layouts"
 const dbPath = path.join(process.cwd(), "prisma/dev.db");
 const adapter = new PrismaBetterSqlite3({ url: dbPath });
 const prisma = new PrismaClient({ adapter });
-const { popularRoutes, ...siteSettingsFields } = defaultSiteSettings;
+const { popularRoutes, popularRouteImages, ...siteSettingsFields } = defaultSiteSettings;
 
 async function main() {
   await prisma.booking.deleteMany();
@@ -23,8 +23,23 @@ async function main() {
         name: terminal.name,
         city: terminal.city,
         state: terminal.state,
+        address: terminal.address ?? "",
+        phone: terminal.phone ?? "",
+        hours: terminal.hours ?? "",
+        mapUrl: terminal.mapUrl ?? "",
+        facilitiesJson: JSON.stringify(terminal.facilities ?? []),
       },
-      create: terminal,
+      create: {
+        id: terminal.id,
+        name: terminal.name,
+        city: terminal.city,
+        state: terminal.state,
+        address: terminal.address ?? "",
+        phone: terminal.phone ?? "",
+        hours: terminal.hours ?? "",
+        mapUrl: terminal.mapUrl ?? "",
+        facilitiesJson: JSON.stringify(terminal.facilities ?? []),
+      },
     });
   }
 
@@ -54,6 +69,7 @@ async function main() {
         availableSeats: trip.availableSeats,
         busType: trip.busType,
         busLayoutId: trip.busLayoutId ?? null,
+        amenitiesJson: JSON.stringify(trip.amenities ?? []),
         isActive: trip.isActive ?? true,
       },
       create: {
@@ -67,6 +83,7 @@ async function main() {
         availableSeats: trip.availableSeats,
         busType: trip.busType,
         busLayoutId: trip.busLayoutId ?? null,
+        amenitiesJson: JSON.stringify(trip.amenities ?? []),
         isActive: trip.isActive ?? true,
       },
     });
@@ -77,11 +94,13 @@ async function main() {
     update: {
       ...siteSettingsFields,
       popularRoutesJson: JSON.stringify(popularRoutes),
+      popularRouteImagesJson: JSON.stringify(popularRouteImages),
     },
     create: {
       id: "site",
       ...siteSettingsFields,
       popularRoutesJson: JSON.stringify(popularRoutes),
+      popularRouteImagesJson: JSON.stringify(popularRouteImages),
     },
   });
 

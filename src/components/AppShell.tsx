@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { PageTransition } from "@/components/PageTransition";
+import { PwaRegister } from "@/components/PwaRegister";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -23,6 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Suspense fallback={null}>
         <PageTransition />
       </Suspense>
+      <PwaRegister />
     </>
   );
 }

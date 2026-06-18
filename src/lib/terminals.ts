@@ -3,6 +3,11 @@ export type Terminal = {
   name: string;
   city: string;
   state: string;
+  address?: string;
+  phone?: string;
+  hours?: string;
+  mapUrl?: string;
+  facilities?: string[];
 };
 
 export const terminals: Terminal[] = [
@@ -12,12 +17,22 @@ export const terminals: Terminal[] = [
     name: "Fadeyi Terminal",
     city: "Lagos",
     state: "Lagos",
+    address: "Fadeyi, Ikorodu Road, Lagos",
+    phone: "+234 913 399 4004",
+    hours: "6:00 AM - 6:00 PM",
+    mapUrl: "https://maps.google.com/?q=Fadeyi+Lagos",
+    facilities: ["Waiting area", "Ticket support", "Nearby transit access"],
   },
   {
     id: "lagos-ajah",
     name: "Ajah Terminal",
     city: "Lagos",
     state: "Lagos",
+    address: "Ajah, Lagos",
+    phone: "+234 913 399 4004",
+    hours: "6:00 AM - 6:00 PM",
+    mapUrl: "https://maps.google.com/?q=Ajah+Lagos",
+    facilities: ["Waiting area", "Ticket support"],
   },
 
   // BENIN
@@ -26,18 +41,33 @@ export const terminals: Terminal[] = [
     name: "Idokpa Terminal",
     city: "Benin",
     state: "Edo",
+    address: "Idokpa, Benin City",
+    phone: "+234 913 399 4004",
+    hours: "6:00 AM - 6:00 PM",
+    mapUrl: "https://maps.google.com/?q=Idokpa+Benin+City",
+    facilities: ["Waiting area", "Boarding support", "Customer support"],
   },
   {
     id: "benin-ramat-park",
     name: "Ramat Park Terminal",
     city: "Benin",
     state: "Edo",
+    address: "Ramat Park, Benin City",
+    phone: "+234 913 399 4004",
+    hours: "6:00 AM - 6:00 PM",
+    mapUrl: "https://maps.google.com/?q=Ramat+Park+Benin+City",
+    facilities: ["Waiting area", "Boarding support"],
   },
   {
     id: "benin-uselu",
     name: "Uselu Terminal",
     city: "Benin",
     state: "Edo",
+    address: "Uselu, Benin City",
+    phone: "+234 913 399 4004",
+    hours: "6:00 AM - 6:00 PM",
+    mapUrl: "https://maps.google.com/?q=Uselu+Benin+City",
+    facilities: ["Waiting area", "Ticket support"],
   },
 
   // ONITSHA
@@ -46,6 +76,11 @@ export const terminals: Terminal[] = [
     name: "Ukumango Terminal",
     city: "Onitsha",
     state: "Anambra",
+    address: "Ukumango, Onitsha",
+    phone: "+234 913 399 4004",
+    hours: "6:00 AM - 6:00 PM",
+    mapUrl: "https://maps.google.com/?q=Ukumango+Onitsha",
+    facilities: ["Waiting area", "Boarding support"],
   },
 ];
 

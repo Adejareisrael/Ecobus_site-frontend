@@ -6,8 +6,10 @@ import {
   BusFront,
   Calendar,
   BadgePercent,
+  BarChart3,
   LayoutDashboard,
   MapPin,
+  RefreshCcw,
   Send,
   ShieldCheck,
   Ticket,
@@ -120,6 +122,30 @@ export default function AdminLayout({
           </Link>
 
           <Link
+            href="/admin/charter-requests"
+            className={`flex items-center gap-2 p-3 rounded-xl transition ${
+              isActive("/admin/charter-requests")
+                ? "bg-blue-50 text-blue-600"
+                : "hover:bg-slate-100"
+            }`}
+          >
+            <BusFront className="h-4 w-4" />
+            Vehicle hire
+          </Link>
+
+          <Link
+            href="/admin/change-requests"
+            className={`flex items-center gap-2 p-3 rounded-xl transition ${
+              isActive("/admin/change-requests")
+                ? "bg-blue-50 text-blue-600"
+                : "hover:bg-slate-100"
+            }`}
+          >
+            <RefreshCcw className="h-4 w-4" />
+            Change requests
+          </Link>
+
+          <Link
             href="/admin/trips"
             className={`flex items-center gap-2 p-3 rounded-xl transition ${
               isActive("/admin/trips")
@@ -179,6 +205,18 @@ export default function AdminLayout({
             Validate
           </Link>
 
+          <Link
+            href="/admin/reports"
+            className={`flex items-center gap-2 p-3 rounded-xl transition ${
+              isActive("/admin/reports")
+                ? "bg-blue-50 text-blue-600"
+                : "hover:bg-slate-100"
+            }`}
+          >
+            <BarChart3 className="h-4 w-4" />
+            Reports
+          </Link>
+
         </nav>
       </aside>
 
@@ -214,6 +252,24 @@ export default function AdminLayout({
             }`}
           >
             Ticket delivery
+          </Link>
+
+          <Link
+            href="/admin/charter-requests"
+            className={`whitespace-nowrap ${
+              isActive("/admin/charter-requests") ? "text-blue-600 font-semibold" : ""
+            }`}
+          >
+            Vehicle hire
+          </Link>
+
+          <Link
+            href="/admin/change-requests"
+            className={`whitespace-nowrap ${
+              isActive("/admin/change-requests") ? "text-blue-600 font-semibold" : ""
+            }`}
+          >
+            Changes
           </Link>
 
           <Link
@@ -259,6 +315,15 @@ export default function AdminLayout({
             }`}
           >
             Validate
+          </Link>
+
+          <Link
+            href="/admin/reports"
+            className={`whitespace-nowrap ${
+              isActive("/admin/reports") ? "text-blue-600 font-semibold" : ""
+            }`}
+          >
+            Reports
           </Link>
 
         </div>

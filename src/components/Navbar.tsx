@@ -46,6 +46,7 @@ export function Navbar() {
     () => {
       const items = [
         { label: "Book a trip", href: "/search" },
+        { label: "Hire a bus", href: "/hire" },
         { label: "Find booking", href: "/lookup" },
       ];
 

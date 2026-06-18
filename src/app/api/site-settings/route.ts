@@ -11,13 +11,30 @@ import {
 import { isAuthResponse, requireAdmin } from "@/lib/api-auth";
 
 function sanitizeSettings(input: Partial<SiteSettings>): SiteSettings {
+  const popularRoutes =
+    Array.isArray(input.popularRoutes) && input.popularRoutes.length > 0
+      ? input.popularRoutes.map(String).slice(0, 8)
+      : defaultSiteSettings.popularRoutes;
+
+  const popularRouteImages =
+    Array.isArray(input.popularRouteImages) && input.popularRouteImages.length > 0
+      ? popularRoutes.map(
+          (_, index) =>
+            String(input.popularRouteImages?.[index] || "").trim() ||
+            defaultSiteSettings.popularRouteImages[index] ||
+            defaultSiteSettings.popularRouteImages[0]
+        )
+      : popularRoutes.map(
+          (_, index) =>
+            defaultSiteSettings.popularRouteImages[index] ||
+            defaultSiteSettings.popularRouteImages[0]
+        );
+
   return {
     ...defaultSiteSettings,
     ...input,
-    popularRoutes:
-      Array.isArray(input.popularRoutes) && input.popularRoutes.length > 0
-        ? input.popularRoutes.map(String).slice(0, 8)
-        : defaultSiteSettings.popularRoutes,
+    popularRoutes,
+    popularRouteImages,
   };
 }
 
@@ -47,6 +64,7 @@ export async function PATCH(req: NextRequest) {
       {
         ...settings,
         popularRoutes: JSON.parse(updated.popularRoutesJson) as string[],
+        popularRouteImages: JSON.parse(updated.popularRouteImagesJson) as string[],
       },
       { headers: { "Cache-Control": "no-store" } }
     );
@@ -73,6 +91,7 @@ export async function DELETE(req: NextRequest) {
       {
         ...defaultSiteSettings,
         popularRoutes: JSON.parse(reset.popularRoutesJson) as string[],
+        popularRouteImages: JSON.parse(reset.popularRouteImagesJson) as string[],
       },
       { headers: { "Cache-Control": "no-store" } }
     );

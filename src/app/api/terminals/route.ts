@@ -15,6 +15,11 @@ function validateTerminal(input: {
   name?: string;
   city?: string;
   state?: string;
+  address?: string;
+  phone?: string;
+  hours?: string;
+  mapUrl?: string;
+  facilities?: string[];
 }) {
   const name = input.name?.trim();
   const city = input.city?.trim();
@@ -29,6 +34,30 @@ function validateTerminal(input: {
     name,
     city,
     state,
+    address: input.address?.trim() || "",
+    phone: input.phone?.trim() || "",
+    hours: input.hours?.trim() || "",
+    mapUrl: input.mapUrl?.trim() || "",
+    facilitiesJson: JSON.stringify(
+      Array.isArray(input.facilities) ? input.facilities.map(String) : []
+    ),
+  };
+}
+
+function formatTerminal(terminal: {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  address: string;
+  phone: string;
+  hours: string;
+  mapUrl: string;
+  facilitiesJson: string;
+}) {
+  return {
+    ...terminal,
+    facilities: JSON.parse(terminal.facilitiesJson) as string[],
   };
 }
 
@@ -37,7 +66,7 @@ export async function GET() {
     orderBy: [{ city: "asc" }, { name: "asc" }],
   });
 
-  return NextResponse.json(terminals, {
+  return NextResponse.json(terminals.map(formatTerminal), {
     headers: { "Cache-Control": "no-store" },
   });
 }
@@ -53,7 +82,7 @@ export async function POST(req: NextRequest) {
     }
 
     const terminal = await prisma.terminal.create({ data: terminalInput });
-    return NextResponse.json(terminal, { status: 201 });
+    return NextResponse.json(formatTerminal(terminal), { status: 201 });
   } catch {
     return NextResponse.json({ error: "Terminal could not be created" }, { status: 500 });
   }

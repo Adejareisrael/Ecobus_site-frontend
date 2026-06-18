@@ -13,6 +13,8 @@ type Props = {
   initialFrom?: string;
   initialTo?: string;
   initialDate?: string;
+  initialReturnDate?: string;
+  initialTripType?: string;
 };
 
 export function SearchForm({
@@ -20,12 +22,16 @@ export function SearchForm({
   initialFrom = "",
   initialTo = "",
   initialDate = "",
+  initialReturnDate = "",
+  initialTripType = "one-way",
 }: Props) {
   const router = useRouter();
 
   const [from, setFrom] = useState(initialFrom);
   const [to, setTo] = useState(initialTo);
   const [date, setDate] = useState(initialDate);
+  const [returnDate, setReturnDate] = useState(initialReturnDate);
+  const [tripType, setTripType] = useState(initialTripType);
 
   const destinations = useMemo(() => {
     return terminals.filter((t) => t.id !== from);
@@ -38,11 +44,17 @@ export function SearchForm({
     const nextFrom = String(formData.get("from") || "");
     const nextTo = String(formData.get("to") || "");
     const nextDate = String(formData.get("date") || "");
+    const nextReturnDate = String(formData.get("returnDate") || "");
+    const nextTripType = String(formData.get("tripType") || "one-way");
     const params = new URLSearchParams();
 
     if (nextFrom) params.set("from", nextFrom);
     if (nextTo) params.set("to", nextTo);
     if (nextDate) params.set("date", nextDate);
+    if (nextTripType === "round-trip") {
+      params.set("tripType", "round-trip");
+      if (nextReturnDate) params.set("returnDate", nextReturnDate);
+    }
 
     router.push(`/search?${params.toString()}`);
   };
@@ -65,6 +77,32 @@ export function SearchForm({
         md:grid-cols-[1.2fr_auto_1.2fr_1fr_auto]
       "
     >
+      <div className="flex rounded-xl bg-slate-100 p-1 text-sm font-medium md:col-span-full md:w-fit">
+        {[
+          ["one-way", "One way"],
+          ["round-trip", "Round trip"],
+        ].map(([value, label]) => (
+          <label
+            key={value}
+            className={`cursor-pointer rounded-lg px-4 py-2 transition ${
+              tripType === value
+                ? "bg-white text-ecobus-red shadow-sm"
+                : "text-slate-500"
+            }`}
+          >
+            <input
+              type="radio"
+              name="tripType"
+              value={value}
+              checked={tripType === value}
+              onChange={(event) => setTripType(event.target.value)}
+              className="sr-only"
+            />
+            {label}
+          </label>
+        ))}
+      </div>
+
       <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
         From
         <Select name="from" value={from} onChange={(e) => setFrom(e.target.value)}>
@@ -112,6 +150,19 @@ export function SearchForm({
           onChange={(e) => setDate(e.target.value)}
         />
       </label>
+
+      {tripType === "round-trip" && (
+        <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500 md:col-start-4">
+          Return date
+          <Input
+            type="date"
+            name="returnDate"
+            min={date || minDate}
+            value={returnDate}
+            onChange={(e) => setReturnDate(e.target.value)}
+          />
+        </label>
+      )}
 
       <Button className="h-12 w-full self-end gap-2 dark:bg-sky-500 dark:hover:bg-sky-400" type="submit">
         <Search className="h-4 w-4" />

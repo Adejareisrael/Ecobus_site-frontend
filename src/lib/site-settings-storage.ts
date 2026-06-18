@@ -6,6 +6,7 @@ export type SiteSettings = {
   heroCardTitle: string;
   heroCardDescription: string;
   popularRoutes: string[];
+  popularRouteImages: string[];
   footerDescription: string;
   supportText: string;
   whatsappNumber: string;
@@ -37,6 +38,12 @@ export const defaultSiteSettings: SiteSettings = {
     "Lagos (Ajah) -> Abuja",
     "Benin -> Lagos (Ajah)",
     "Lagos -> Port Harcourt",
+  ],
+  popularRouteImages: [
+    "/route-lagos-benin.jpg",
+    "/route-lagos-abuja.jpg",
+    "/route-benin-lagos.jpg",
+    "/route-lagos-port-harcourt.jpg",
   ],
   footerDescription: "Scheduled intercity travel made simple across Nigeria.",
   supportText: "Need help with bookings or payments?",

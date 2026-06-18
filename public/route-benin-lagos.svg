@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="Benin to Lagos route">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0284c7"/>
+      <stop offset=".55" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#6d28d9"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="520" fill="url(#bg)"/>
+  <path d="M0 302 C128 268 230 292 350 244 C492 187 632 184 800 126 L800 520 L0 520 Z" fill="#134e4a" opacity=".75"/>
+  <path d="M0 380 C150 318 230 340 360 292 C520 232 640 250 800 196 L800 520 L0 520 Z" fill="#0f172a" opacity=".38"/>
+  <path d="M220 520 C305 420 362 336 415 282 C472 224 548 184 620 158" fill="none" stroke="#0f172a" stroke-width="96" stroke-linecap="round"/>
+  <path d="M220 520 C305 420 362 336 415 282 C472 224 548 184 620 158" fill="none" stroke="#f8fafc" stroke-width="10" stroke-dasharray="32 32" stroke-linecap="round" opacity=".8"/>
+  <g transform="translate(458 278) rotate(-10)">
+    <rect x="0" y="38" width="220" height="86" rx="22" fill="#f8fafc"/>
+    <rect x="32" y="6" width="116" height="54" rx="18" fill="#f8fafc"/>
+    <rect x="22" y="54" width="42" height="30" rx="8" fill="#2563eb"/>
+    <rect x="78" y="54" width="42" height="30" rx="8" fill="#2563eb"/>
+    <rect x="134" y="54" width="42" height="30" rx="8" fill="#2563eb"/>
+    <circle cx="54" cy="126" r="19" fill="#020617"/>
+    <circle cx="168" cy="126" r="19" fill="#020617"/>
+  </g>
+  <text x="44" y="72" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="700">Benin to Lagos</text>
+</svg>

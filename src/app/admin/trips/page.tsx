@@ -21,6 +21,7 @@ type TripForm = {
   availableSeats: string;
   busType: Trip["busType"];
   busLayoutId: string;
+  amenities: string;
 };
 
 const emptyForm: TripForm = {
@@ -33,6 +34,7 @@ const emptyForm: TripForm = {
   availableSeats: "14",
   busType: "Toyota",
   busLayoutId: "toyota-14",
+  amenities: "AC, USB charging, Luggage space",
 };
 
 export default function AdminTripsPage() {
@@ -135,6 +137,7 @@ export default function AdminTripsPage() {
       availableSeats: String(trip.availableSeats),
       busType: trip.busType,
       busLayoutId: trip.busLayoutId ?? "",
+      amenities: (trip.amenities ?? []).join(", "),
     });
     setEditingId(trip.id);
     setIsFormOpen(true);
@@ -191,6 +194,10 @@ export default function AdminTripsPage() {
       availableSeats,
       busType: form.busType,
       busLayoutId: form.busLayoutId || null,
+      amenities: form.amenities
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
       routeLabel: routeLabel(form.departureTerminalId, form.destinationTerminalId),
     };
 
@@ -393,6 +400,17 @@ export default function AdminTripsPage() {
                   required
                 />
               </label>
+
+              <label className="grid gap-1 text-xs font-medium text-slate-500 xl:col-span-2">
+                Amenities
+                <Input
+                  value={form.amenities}
+                  onChange={(event) =>
+                    updateForm({ amenities: event.target.value })
+                  }
+                  placeholder="AC, USB charging, Luggage space"
+                />
+              </label>
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -444,6 +462,19 @@ export default function AdminTripsPage() {
             <p className="text-lg font-bold text-ecobus-red">
               {formatNaira(trip.price)}
             </p>
+
+            {trip.amenities && trip.amenities.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {trip.amenities.map((amenity) => (
+                  <span
+                    key={amenity}
+                    className="rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
+                  >
+                    {amenity}
+                  </span>
+                ))}
+              </div>
+            )}
 
             <div className="flex gap-2 pt-1">
               <Button
