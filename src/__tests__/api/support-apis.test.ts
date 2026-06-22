@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { GET as lookupBooking } from "@/app/api/bookings/lookup/route";
 import { GET as health } from "@/app/api/health/route";
 import {
@@ -15,6 +15,7 @@ import {
 } from "@/app/api/bus-layouts/[layoutId]/route";
 import { GET as getDeliveries } from "@/app/api/ticket-deliveries/route";
 import { PATCH as updateDelivery } from "@/app/api/ticket-deliveries/[deliveryId]/route";
+import { POST as sendTestEmail } from "@/app/api/ticket-deliveries/test-email/route";
 import { NextRequest } from "next/server";
 import {
   createAdmin,
@@ -47,6 +48,10 @@ const layoutInput = {
     { id: "seat-2", label: "2", isAvailable: true, row: 2, column: 1 },
   ],
 };
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("customer booking lookup", () => {
   it("finds a booking by reference and passenger contact", async () => {
@@ -293,5 +298,59 @@ describe("admin ticket delivery outbox", () => {
     expect(updateRes.status).toBe(200);
     expect(updated.status).toBe("Sent");
     expect(updated.sentAt).toEqual(expect.any(String));
+  });
+
+  it("lets admins send a Resend test ticket email", async () => {
+    const { token } = await createAdmin();
+    const originalApiKey = process.env.RESEND_API_KEY;
+    const originalFrom = process.env.EMAIL_FROM;
+
+    process.env.RESEND_API_KEY = "re_test_key";
+    process.env.EMAIL_FROM = "Ecobus <tickets@mail.ecobustransport.com>";
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ id: "email_test_123" }), { status: 200 })
+    );
+
+    try {
+      const res = await sendTestEmail(
+        rJson(
+          "/api/ticket-deliveries/test-email",
+          "POST",
+          { recipient: "ops@test.com" },
+          token
+        )
+      );
+      const data = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(data.status).toBe("Sent");
+      expect(data.providerId).toBe("email_test_123");
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "https://api.resend.com/emails",
+        expect.objectContaining({
+          method: "POST",
+          headers: expect.objectContaining({
+            Authorization: "Bearer re_test_key",
+          }),
+        })
+      );
+
+      const delivery = await prisma.ticketDelivery.findFirst({
+        where: { reference: "ECO-TEST", recipient: "ops@test.com" },
+      });
+      expect(delivery?.status).toBe("Sent");
+    } finally {
+      if (originalApiKey === undefined) {
+        delete process.env.RESEND_API_KEY;
+      } else {
+        process.env.RESEND_API_KEY = originalApiKey;
+      }
+
+      if (originalFrom === undefined) {
+        delete process.env.EMAIL_FROM;
+      } else {
+        process.env.EMAIL_FROM = originalFrom;
+      }
+    }
   });
 });

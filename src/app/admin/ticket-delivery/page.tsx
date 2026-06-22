@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Copy, Mail, MessageCircle, Phone, RefreshCw, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -34,6 +35,8 @@ export default function AdminTicketDeliveryPage() {
   const [channelFilter, setChannelFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [testRecipient, setTestRecipient] = useState("");
+  const [sendingTest, setSendingTest] = useState(false);
   const [message, setMessage] = useState("");
 
   const query = useMemo(() => {
@@ -112,6 +115,38 @@ export default function AdminTicketDeliveryPage() {
     setMessage("Ticket message copied.");
   };
 
+  const sendTestEmail = async () => {
+    if (!token) return;
+    setSendingTest(true);
+    setMessage("");
+
+    const res = await fetch("/api/ticket-deliveries/test-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ recipient: testRecipient }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      status?: string;
+      recipient?: string;
+      error?: string | null;
+    };
+
+    if (res.ok && data.status === "Sent") {
+      setMessage(`Test ticket email sent to ${data.recipient}.`);
+      setStatusFilter("all");
+      void loadDeliveries();
+    } else if (res.ok && data.status === "Skipped") {
+      setMessage(data.error ?? "Test email skipped because Resend is not configured.");
+    } else {
+      setMessage(data.error ?? "Could not send the test ticket email.");
+    }
+
+    setSendingTest(false);
+  };
+
   const deliveryHref = (delivery: Delivery) => {
     if (delivery.channel === "email") {
       return `mailto:${delivery.recipient}?subject=${encodeURIComponent(
@@ -159,6 +194,22 @@ export default function AdminTicketDeliveryPage() {
             <option value="sms">SMS</option>
           </Select>
         </label>
+      </Card>
+
+      <Card className="grid gap-3 p-4 lg:grid-cols-[1fr_auto] lg:items-end">
+        <label className="grid gap-1 text-xs font-medium text-slate-500">
+          Test ticket email
+          <Input
+            type="email"
+            value={testRecipient}
+            onChange={(event) => setTestRecipient(event.target.value)}
+            placeholder="Leave blank to use support email"
+          />
+        </label>
+        <Button className="gap-2" onClick={sendTestEmail} disabled={sendingTest || !token}>
+          <Mail className="h-4 w-4" />
+          {sendingTest ? "Sending..." : "Send test"}
+        </Button>
       </Card>
 
       {message && (
