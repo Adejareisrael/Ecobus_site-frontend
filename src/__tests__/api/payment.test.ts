@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { POST as verify } from "@/app/api/payment/verify/route";
 import { POST as webhook } from "@/app/api/payment/webhook/route";
 import { NextRequest } from "next/server";
@@ -74,6 +74,72 @@ describe("POST /api/payment/verify", () => {
       "whatsapp",
     ]);
     expect(deliveries.every((delivery) => delivery.status === "Pending")).toBe(true);
+  });
+
+  it("sends the ticket email through Resend when email env vars are configured", async () => {
+    const ref = "ps-ref-resend-email";
+    const originalApiKey = process.env.RESEND_API_KEY;
+    const originalEmailFrom = process.env.EMAIL_FROM;
+    process.env.RESEND_API_KEY = "re_test_key";
+    process.env.EMAIL_FROM = "Ecobus <tickets@mail.ecobustransport.com>";
+
+    const fetchMock = vi.fn((url: string | URL | Request) => {
+      const href = typeof url === "string" ? url : url instanceof URL ? url.href : url.url;
+
+      if (href.includes("api.paystack.co")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              status: true,
+              message: "Verification successful",
+              data: {
+                status: "success",
+                reference: ref,
+                amount: EXPECTED_KOBO,
+                currency: "NGN",
+              },
+            })
+          )
+        );
+      }
+
+      if (href.includes("api.resend.com")) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ id: "email_123" }), { status: 200 })
+        );
+      }
+
+      return Promise.reject(new Error(`Unexpected fetch URL: ${href}`));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    try {
+      const res = await verify(r(validBody(ref)));
+      const data = await res.json();
+
+      expect(res.status).toBe(201);
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://api.resend.com/emails",
+        expect.objectContaining({
+          method: "POST",
+          headers: expect.objectContaining({
+            Authorization: "Bearer re_test_key",
+          }),
+        })
+      );
+
+      const emailDelivery = await prisma.ticketDelivery.findFirst({
+        where: { bookingId: data.id, channel: "email" },
+      });
+      expect(emailDelivery?.status).toBe("Sent");
+      expect(emailDelivery?.sentAt).toBeInstanceOf(Date);
+    } finally {
+      if (originalApiKey === undefined) delete process.env.RESEND_API_KEY;
+      else process.env.RESEND_API_KEY = originalApiKey;
+
+      if (originalEmailFrom === undefined) delete process.env.EMAIL_FROM;
+      else process.env.EMAIL_FROM = originalEmailFrom;
+    }
   });
 
   it("attaches userId when request carries a valid JWT", async () => {

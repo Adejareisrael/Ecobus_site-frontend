@@ -130,7 +130,7 @@ export default function AdminTicketDeliveryPage() {
         <div>
           <h1 className="text-2xl font-bold lg:text-3xl">Ticket delivery</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Review ticket messages created after bookings. Real delivery APIs can plug into this outbox later.
+            Review booking ticket delivery status. Email sends automatically when Resend is configured.
           </p>
         </div>
         <Button variant="ghost" className="gap-2" onClick={loadDeliveries} disabled={loading}>

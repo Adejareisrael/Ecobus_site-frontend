@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { sendTicketEmail } from "./resend-email";
 import { formatNaira, getDiscountedTotal } from "./utils";
 
 export type TicketDeliveryChannel = "email" | "whatsapp" | "sms";
@@ -44,6 +45,7 @@ export async function enqueueTicketDeliveries(
   origin?: string | null
 ) {
   const message = buildTicketMessage(booking, origin);
+  const ticketUrl = buildTicketUrl(booking.id, origin);
   const deliveries = [
     {
       channel: "email" satisfies TicketDeliveryChannel,
@@ -65,7 +67,7 @@ export async function enqueueTicketDeliveries(
     },
   ].filter((delivery) => delivery.recipient?.trim());
 
-  await prisma.$transaction(
+  const createdDeliveries = await prisma.$transaction(
     deliveries.map((delivery) =>
       prisma.ticketDelivery.create({
         data: {
@@ -79,5 +81,39 @@ export async function enqueueTicketDeliveries(
         },
       })
     )
+  );
+
+  await Promise.all(
+    createdDeliveries.map(async (delivery) => {
+      if (delivery.channel !== "email") return;
+
+      try {
+        const result = await sendTicketEmail({
+          booking,
+          recipient: delivery.recipient,
+          subject: delivery.subject ?? `Ecobus ticket ${booking.reference}`,
+          message: delivery.message,
+          ticketUrl,
+        });
+
+        if (result.skipped) return;
+
+        await prisma.ticketDelivery.update({
+          where: { id: delivery.id },
+          data: result.sent
+            ? { status: "Sent", sentAt: new Date(), lastError: null }
+            : { status: "Failed", lastError: result.error ?? "Email delivery failed" },
+        });
+      } catch (error) {
+        await prisma.ticketDelivery.update({
+          where: { id: delivery.id },
+          data: {
+            status: "Failed",
+            lastError:
+              error instanceof Error ? error.message : "Email delivery failed unexpectedly",
+          },
+        });
+      }
+    })
   );
 }
