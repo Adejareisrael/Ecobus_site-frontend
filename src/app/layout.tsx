@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   title: "Ecobus | Intercity Booking",
   description: "Book scheduled intercity bus trips with seat selection.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
   appleWebApp: {
     capable: true,
     title: "Ecobus",

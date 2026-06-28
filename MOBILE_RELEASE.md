@@ -7,7 +7,7 @@ Ecobus now has Capacitor native shells for Android and iOS. The native apps load
 - Android package: `com.ecobustransport.app`
 - iOS bundle id: `com.ecobustransport.app`
 - App name: `Ecobus`
-- Default mobile server: `https://ecobus-site-frontend.vercel.app`
+- Default mobile server: `https://booking.ecobustransport.com`
 
 To point a build at another production URL:
 
