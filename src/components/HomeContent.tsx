@@ -109,12 +109,27 @@ type SliderProps = {
   fallbackImages: string[];
 };
 
+function useVisibleCount() {
+  const [count, setCount] = useState(1);
+  useEffect(() => {
+    const update = () => {
+      if (window.innerWidth >= 1024) setCount(3);
+      else if (window.innerWidth >= 640) setCount(2);
+      else setCount(1);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return count;
+}
+
 function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProps) {
   const [current, setCurrent] = useState(0);
   const [expanded, setExpanded] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const total = routes.length;
-  const visibleCount = 3;
+  const visibleCount = useVisibleCount();
 
   const resetTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
