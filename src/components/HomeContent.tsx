@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -177,16 +178,17 @@ function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProp
                   onClick={() => setExpanded(idx)}
                   className="cursor-pointer group"
                 >
-                  <article className="relative min-h-[220px] overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm transition-shadow hover:shadow-lg dark:border-slate-800">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <article className="relative h-[220px] overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm transition-shadow hover:shadow-lg dark:border-slate-800">
+                    <Image
                       src={image}
                       alt=""
-                      className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                      loading="lazy"
+                      fill
+                      priority={position === 0}
+                      sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 24px), calc(33vw - 24px)"
+                      className="object-cover transition duration-300 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
-                    <div className="relative flex h-full min-h-[220px] flex-col justify-end p-5 text-white">
+                    <div className="relative flex h-full flex-col justify-end p-5 text-white">
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100">Popular route</p>
                       <h3 className="mt-2 text-lg font-semibold leading-snug">{route}</h3>
                       <span className="mt-4 text-sm font-medium text-sky-100">View trips</span>
@@ -231,12 +233,16 @@ function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProp
               className="relative w-full max-w-md overflow-hidden rounded-2xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={routeImages[expanded] || fallbackImages[expanded] || "/route-lagos-benin.jpg"}
-                alt=""
-                className="h-64 w-full object-cover"
-              />
+              <div className="relative h-64 w-full">
+                <Image
+                  src={routeImages[expanded] || fallbackImages[expanded] || "/route-lagos-benin.jpg"}
+                  alt=""
+                  fill
+                  sizes="(max-width: 639px) calc(100vw - 32px), 448px"
+                  className="object-cover"
+                  priority
+                />
+              </div>
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                 <p className="text-xs font-semibold uppercase tracking-widest text-sky-200">Popular route</p>
