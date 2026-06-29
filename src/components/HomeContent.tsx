@@ -135,7 +135,7 @@ function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProp
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % total);
-    }, 3500);
+    }, 4000);
   };
 
   useEffect(() => {
@@ -170,10 +170,10 @@ function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProp
               {visibleRoutes.map(({ idx, route, image }, position) => (
                 <motion.div
                   key={`${idx}-${route}`}
-                  initial={{ opacity: 0, x: 60 }}
+                  initial={{ opacity: 0, x: 40 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -60 }}
-                  transition={{ duration: 0.4, delay: position * 0.07 }}
+                  exit={{ opacity: 0, x: -40 }}
+                  transition={{ type: "spring", stiffness: 380, damping: 30, mass: 0.8 }}
                   onClick={() => setExpanded(idx)}
                   className="cursor-pointer group"
                 >
@@ -227,7 +227,7 @@ function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProp
               initial={{ scale: 0.75, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.75, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              transition={{ type: "spring", stiffness: 420, damping: 32, mass: 0.7 }}
               className="relative w-full max-w-md overflow-hidden rounded-2xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
