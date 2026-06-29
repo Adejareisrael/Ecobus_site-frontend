@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { SearchForm } from "@/components/SearchForm";
 import { Card } from "@/components/ui/Card";
 import { Terminal } from "@/lib/types";
@@ -70,50 +71,11 @@ export function HomeContent({ terminals, initialSettings }: Props) {
         </Card>
       </section>
 
-      <section className="space-y-6">
-        <div className="flex items-end justify-between">
-          <h2 className="text-xl sm:text-2xl font-semibold">Popular routes</h2>
-
-          <Link href="/search" className="text-sm font-medium text-ecobus-red">
-            View all
-          </Link>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {settings.popularRoutes.map((route, index) => {
-            const routeImage =
-              settings.popularRouteImages[index] ||
-              initialSettings.popularRouteImages[index] ||
-              "/route-lagos-benin.jpg";
-
-            return (
-              <Link key={`${route}-${index}`} href="/search" className="group">
-                <article className="relative min-h-[220px] overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- Admins can configure local or external route images. */}
-                  <img
-                    src={routeImage}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
-                  <div className="relative flex h-full min-h-[220px] flex-col justify-end p-5 text-white">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100">
-                      Popular route
-                    </p>
-                    <h3 className="mt-2 text-lg font-semibold leading-snug">
-                      {route}
-                    </h3>
-                    <span className="mt-4 text-sm font-medium text-sky-100">
-                      View trips
-                    </span>
-                  </div>
-                </article>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+      <PopularRoutesSlider
+        routes={settings.popularRoutes}
+        routeImages={settings.popularRouteImages}
+        fallbackImages={initialSettings.popularRouteImages}
+      />
 
       <section className="space-y-6">
         <div className="flex items-end justify-between">
@@ -138,5 +100,153 @@ export function HomeContent({ terminals, initialSettings }: Props) {
         </div>
       </section>
     </div>
+  );
+}
+
+type SliderProps = {
+  routes: string[];
+  routeImages: string[];
+  fallbackImages: string[];
+};
+
+function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProps) {
+  const [current, setCurrent] = useState(0);
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const total = routes.length;
+  const visibleCount = 3;
+
+  const resetTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % total);
+    }, 3500);
+  };
+
+  useEffect(() => {
+    resetTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [total]);
+
+  const goTo = (idx: number) => {
+    setCurrent(idx);
+    resetTimer();
+  };
+
+  const visibleRoutes = Array.from({ length: visibleCount }, (_, i) => {
+    const idx = (current + i) % total;
+    return { idx, route: routes[idx], image: routeImages[idx] || fallbackImages[idx] || "/route-lagos-benin.jpg" };
+  });
+
+  return (
+    <>
+      <section className="space-y-6">
+        <div className="flex items-end justify-between">
+          <h2 className="text-xl sm:text-2xl font-semibold">Popular routes</h2>
+          <Link href="/search" className="text-sm font-medium text-ecobus-red">
+            View all
+          </Link>
+        </div>
+
+        <div className="relative overflow-hidden">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence mode="popLayout">
+              {visibleRoutes.map(({ idx, route, image }, position) => (
+                <motion.div
+                  key={`${idx}-${route}`}
+                  initial={{ opacity: 0, x: 60 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -60 }}
+                  transition={{ duration: 0.4, delay: position * 0.07 }}
+                  onClick={() => setExpanded(idx)}
+                  className="cursor-pointer group"
+                >
+                  <article className="relative min-h-[220px] overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-sm transition-shadow hover:shadow-lg dark:border-slate-800">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={image}
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+                    <div className="relative flex h-full min-h-[220px] flex-col justify-end p-5 text-white">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100">Popular route</p>
+                      <h3 className="mt-2 text-lg font-semibold leading-snug">{route}</h3>
+                      <span className="mt-4 text-sm font-medium text-sky-100">View trips</span>
+                    </div>
+                  </article>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* Dot navigation */}
+          <div className="mt-5 flex justify-center gap-2">
+            {routes.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Go to route ${i + 1}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === current ? "w-6 bg-ecobus-red" : "w-2 bg-slate-300 dark:bg-slate-600"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pop-out modal */}
+      <AnimatePresence>
+        {expanded !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setExpanded(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.75, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.75, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              className="relative w-full max-w-md overflow-hidden rounded-2xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={routeImages[expanded] || fallbackImages[expanded] || "/route-lagos-benin.jpg"}
+                alt=""
+                className="h-64 w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <p className="text-xs font-semibold uppercase tracking-widest text-sky-200">Popular route</p>
+                <h3 className="mt-2 text-2xl font-bold">{routes[expanded]}</h3>
+                <Link
+                  href="/search"
+                  onClick={() => setExpanded(null)}
+                  className="mt-4 inline-block rounded-lg bg-ecobus-red px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+                >
+                  Book this route
+                </Link>
+              </div>
+              <button
+                onClick={() => setExpanded(null)}
+                className="absolute right-3 top-3 rounded-full bg-black/40 p-1.5 text-white hover:bg-black/60"
+                aria-label="Close"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

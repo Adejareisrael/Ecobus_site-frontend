@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="Auchi to Ramat route">
+  <defs>
+    <linearGradient id="bg-ar" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#065f46"/>
+      <stop offset=".55" stop-color="#0369a1"/>
+      <stop offset="1" stop-color="#1e3a5f"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="520" fill="url(#bg-ar)"/>
+  <path d="M0 360 C120 310 240 330 370 272 C510 208 660 218 800 168 L800 520 L0 520 Z" fill="#0f172a" opacity=".38"/>
+  <path d="M0 300 C140 258 248 278 380 228 C524 172 668 172 800 122 L800 520 L0 520 Z" fill="#14532d" opacity=".6"/>
+  <circle cx="680" cy="88" r="60" fill="#fde68a" opacity=".85"/>
+  <path d="M160 520 C238 432 298 356 364 296 C434 232 524 190 614 158" fill="none" stroke="#0f172a" stroke-width="80" stroke-linecap="round"/>
+  <path d="M160 520 C238 432 298 356 364 296 C434 232 524 190 614 158" fill="none" stroke="#f8fafc" stroke-width="10" stroke-dasharray="30 30" stroke-linecap="round" opacity=".85"/>
+  <g transform="translate(400 290) rotate(-8)">
+    <rect x="0" y="38" width="228" height="88" rx="22" fill="#e0f2fe"/>
+    <rect x="32" y="4" width="122" height="56" rx="18" fill="#e0f2fe"/>
+    <rect x="32" y="52" width="44" height="30" rx="8" fill="#2563eb"/>
+    <rect x="90" y="52" width="44" height="30" rx="8" fill="#2563eb"/>
+    <rect x="148" y="52" width="44" height="30" rx="8" fill="#2563eb"/>
+    <circle cx="56" cy="128" r="20" fill="#020617"/>
+    <circle cx="174" cy="128" r="20" fill="#020617"/>
+    <path d="M154 52 H228" stroke="#38bdf8" stroke-width="8"/>
+  </g>
+  <text x="44" y="72" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="700">Auchi to Ramat</text>
+</svg>

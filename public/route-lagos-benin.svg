@@ -24,7 +24,7 @@
     <rect x="140" y="54" width="44" height="30" rx="8" fill="#2563eb"/>
     <circle cx="55" cy="130" r="20" fill="#020617"/>
     <circle cx="172" cy="130" r="20" fill="#020617"/>
-    <path d="M10 113 H214" stroke="#38bdf8" stroke-width="8"/>
+    <path d="M30 113 H214" stroke="#38bdf8" stroke-width="8"/>
   </g>
   <text x="44" y="72" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="700">Lagos to Benin</text>
 </svg>
