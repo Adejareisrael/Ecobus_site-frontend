@@ -1,22 +1,15 @@
-import path from "path";
-import fs from "fs";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createClient() {
-  const bundledDbPath = path.join(process.cwd(), "prisma/dev.db");
-  const dbPath =
-    process.env.VERCEL === "1"
-      ? path.join("/tmp", "ecobus-demo.db")
-      : bundledDbPath;
-
-  if (process.env.VERCEL === "1" && !fs.existsSync(dbPath)) {
-    fs.copyFileSync(bundledDbPath, dbPath);
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL environment variable is not set");
   }
 
-  const adapter = new PrismaBetterSqlite3({ url: dbPath });
+  const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter });
 }
 

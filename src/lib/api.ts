@@ -1,23 +1,14 @@
 import {
-  Booking,
-  Passenger,
   Seat,
   Terminal,
   Trip,
 } from "./types";
 import { normalizeTravelDate } from "./travel-date";
-import { bookings } from "./mock-data";
-
-const delay = (ms = 350) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
 
 const isBrowser = () => typeof window !== "undefined";
 
-const seatCache: Record<string, Seat[]> = {};
-const bookedSeatsByTrip: Record<string, Set<string>> = {};
-
 /**
- * 🏢 Get all terminals
+ *  Get all terminals
  */
 export async function getTerminals(): Promise<Terminal[]> {
   if (!isBrowser()) {
@@ -31,8 +22,7 @@ export async function getTerminals(): Promise<Terminal[]> {
 }
 
 /**
- * 🚌 Get trips (FILTERED)
- * Now uses terminal IDs (correct architecture)
+ *  Get trips (FILTERED)
  */
 export async function getTrips(params: {
   from?: string;
@@ -54,7 +44,7 @@ export async function getTrips(params: {
 }
 
 /**
- * 🧭 Get single trip
+ *  Get single trip
  */
 export async function getTripById(
   tripId: string
@@ -70,7 +60,7 @@ export async function getTripById(
 }
 
 /**
- * 💺 Get seats for a trip
+ *  Get seats for a trip
  * Includes booking state overlay
  */
 export async function getSeats(
@@ -95,54 +85,4 @@ export async function getSeats(
   const trip = await getDbTripById(tripId);
   if (!trip) return [];
   return getDbSeatsForTrip(trip, travelDate);
-}
-
-/**
- * 🎫 Create booking (mock DB write)
- */
-export async function createBooking(input: {
-  trip: Trip;
-  travelDate?: string | null;
-  seats: string[];
-  passenger: Passenger;
-  paymentMethod: "Card" | "Transfer";
-}): Promise<Booking> {
-  await delay(700);
-  const travelDate = normalizeTravelDate(input.travelDate);
-  const cacheKey = `${input.trip.id}:${travelDate}`;
-
-  if (!bookedSeatsByTrip[cacheKey]) {
-    bookedSeatsByTrip[cacheKey] = new Set();
-  }
-
-  const booked = bookedSeatsByTrip[cacheKey];
-
-  input.seats.forEach((seat) => {
-    booked.add(seat);
-  });
-
-  delete seatCache[cacheKey];
-
-  const booking: Booking = {
-    id: crypto.randomUUID(),
-    reference: `ECO-${Math.floor(100000 + Math.random() * 900000)}`,
-    trip: input.trip,
-    travelDate,
-    seats: input.seats,
-    passenger: input.passenger,
-    paymentMethod: input.paymentMethod,
-    createdAt: new Date().toISOString(),
-    status: "Confirmed",
-  };
-
-  bookings.unshift(booking);
-  return booking;
-}
-
-/**
- * 📦 Get all bookings (admin/dashboard)
- */
-export async function getBookings(): Promise<Booking[]> {
-  await delay();
-  return bookings;
 }

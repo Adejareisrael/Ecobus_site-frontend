@@ -3,9 +3,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   devIndicators: false,
   poweredByHeader: false,
-  outputFileTracingIncludes: {
-    "/*": ["./prisma/dev.db"],
-  },
   async headers() {
     const scriptSrc =
       process.env.NODE_ENV === "development"

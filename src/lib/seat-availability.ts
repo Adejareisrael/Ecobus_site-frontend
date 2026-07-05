@@ -44,7 +44,7 @@ export async function getDbSeatsForTrip(
           OR: [
             { id: toyotaLayoutId },
             { model: trip.busType },
-            { name: { contains: trip.busType } },
+            { name: { contains: trip.busType, mode: "insensitive" } },
           ],
         },
     orderBy: { isDefault: "desc" },

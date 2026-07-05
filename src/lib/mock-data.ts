@@ -1,4 +1,4 @@
-import { Booking, Seat, Trip } from "./types";
+import { Seat, Trip } from "./types";
 import {
   generateGenericSeats,
   generateToyotaSeats,
@@ -6,7 +6,7 @@ import {
 } from "./bus-layouts";
 
 /**
- * 🚌 Trips
+ *  Trips
  */
 export const trips: Trip[] = [
   {
@@ -81,12 +81,7 @@ export const trips: Trip[] = [
 ];
 
 /**
- * 🎫 Mock bookings
- */
-export const bookings: Booking[] = [];
-
-/**
- * 💺 Deterministic seat generator
+ *  Deterministic seat generator
  */
 export function generateSeats(
   busType: Trip["busType"],

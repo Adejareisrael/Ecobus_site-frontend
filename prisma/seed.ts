@@ -1,21 +1,14 @@
-import path from "path";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaClient } from "@prisma/client";
+import "dotenv/config";
 import bcrypt from "bcryptjs";
+import { prisma } from "../src/lib/prisma";
 import { trips } from "../src/lib/mock-data";
 import { terminals } from "../src/lib/terminals";
 import { defaultSiteSettings } from "../src/lib/site-settings-storage";
 import { busLayoutToDbInput, defaultToyotaLayout } from "../src/lib/bus-layouts";
 
-const dbPath = path.join(process.cwd(), "prisma/dev.db");
-const adapter = new PrismaBetterSqlite3({ url: dbPath });
-const prisma = new PrismaClient({ adapter });
 const { popularRoutes, popularRouteImages, ...siteSettingsFields } = defaultSiteSettings;
 
 async function main() {
-  await prisma.booking.deleteMany();
-  await prisma.user.deleteMany();
-
   for (const terminal of terminals) {
     await prisma.terminal.upsert({
       where: { id: terminal.id },
@@ -105,13 +98,17 @@ async function main() {
   });
 
   const adminPw = await bcrypt.hash("Admin123", 10);
-  await prisma.user.create({
-    data: { name: "Admin", email: "admin@ecobus.ng", password: adminPw, role: "admin" },
+  await prisma.user.upsert({
+    where: { email: "admin@ecobus.ng" },
+    update: {},
+    create: { name: "Admin", email: "admin@ecobus.ng", password: adminPw, role: "admin" },
   });
 
   const demoPw = await bcrypt.hash("Demo1234", 10);
-  await prisma.user.create({
-    data: { name: "Demo User", email: "demo@ecobus.ng", password: demoPw },
+  await prisma.user.upsert({
+    where: { email: "demo@ecobus.ng" },
+    update: {},
+    create: { name: "Demo User", email: "demo@ecobus.ng", password: demoPw },
   });
 
   console.log("✅ Seeded: admin@ecobus.ng / Admin123  |  demo@ecobus.ng / Demo1234");

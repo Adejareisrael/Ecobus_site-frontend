@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     const bookings = await prisma.booking.findMany({
       where: {
         userId: payload.userId,
-        ...(reference ? { reference: { contains: reference } } : {}),
+        ...(reference ? { reference: { contains: reference, mode: "insensitive" } } : {}),
       },
       orderBy: { createdAt: "desc" },
       take: 10,
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
 
   const bookings = await prisma.booking.findMany({
     where: {
-      ...(reference ? { reference: { contains: reference } } : {}),
+      ...(reference ? { reference: { contains: reference, mode: "insensitive" } } : {}),
       OR: [
         { passengerEmail: contact },
         { passengerPhone: contact },
