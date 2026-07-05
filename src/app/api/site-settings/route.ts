@@ -10,6 +10,10 @@ import {
 } from "@/lib/server-data";
 import { isAuthResponse, requireAdmin } from "@/lib/api-auth";
 
+// Route images must be uploaded via /api/site-settings/upload-image and referenced
+// by URL here — this cap blocks base64 data URLs from being written to the DB directly.
+const MAX_IMAGE_URL_LENGTH = 2048;
+
 function sanitizeSettings(input: Partial<SiteSettings>): SiteSettings {
   const popularRoutes =
     Array.isArray(input.popularRoutes) && input.popularRoutes.length > 0
@@ -18,12 +22,16 @@ function sanitizeSettings(input: Partial<SiteSettings>): SiteSettings {
 
   const popularRouteImages =
     Array.isArray(input.popularRouteImages) && input.popularRouteImages.length > 0
-      ? popularRoutes.map(
-          (_, index) =>
-            String(input.popularRouteImages?.[index] || "").trim() ||
+      ? popularRoutes.map((_, index) => {
+          const candidate = String(input.popularRouteImages?.[index] || "").trim();
+          const fallback =
             defaultSiteSettings.popularRouteImages[index] ||
-            defaultSiteSettings.popularRouteImages[0]
-        )
+            defaultSiteSettings.popularRouteImages[0];
+
+          return candidate && candidate.length <= MAX_IMAGE_URL_LENGTH
+            ? candidate
+            : fallback;
+        })
       : popularRoutes.map(
           (_, index) =>
             defaultSiteSettings.popularRouteImages[index] ||

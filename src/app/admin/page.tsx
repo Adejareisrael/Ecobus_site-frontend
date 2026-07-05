@@ -26,6 +26,7 @@ export default function AdminPage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -87,12 +88,13 @@ export default function AdminPage() {
     });
   };
 
-  const handlePopularRouteImageUpload = (
+  const handlePopularRouteImageUpload = async (
     index: number,
     event: ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    event.target.value = "";
+    if (!file || !token) return;
 
     if (!file.type.startsWith("image/")) {
       setSaveError("Please upload an image file for the route card.");
@@ -104,17 +106,31 @@ export default function AdminPage() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        updatePopularRouteImage(index, reader.result);
+    setUploadingIndex(index);
+    setSaveError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/site-settings/upload-image", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setSaveError(data.error ?? "Could not upload that image. Please try another file.");
+        return;
       }
-    };
-    reader.onerror = () => {
-      setSaveError("Could not read that image. Please try another file.");
-    };
-    reader.readAsDataURL(file);
-    event.target.value = "";
+
+      updatePopularRouteImage(index, data.url);
+    } catch {
+      setSaveError("Could not upload that image. Please try again.");
+    } finally {
+      setUploadingIndex(null);
+    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -374,13 +390,18 @@ export default function AdminPage() {
                       Route image
                     </p>
                     <div className="flex flex-col gap-2 sm:flex-row">
-                      <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-ecobus-red px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:opacity-90">
+                      <label
+                        className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-ecobus-red px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:opacity-90 ${
+                          uploadingIndex === index ? "opacity-60 pointer-events-none" : ""
+                        }`}
+                      >
                         <ImageUp className="h-4 w-4" />
-                        Upload image
+                        {uploadingIndex === index ? "Uploading..." : "Upload image"}
                         <input
                           type="file"
                           accept="image/*"
                           className="sr-only"
+                          disabled={uploadingIndex === index}
                           onChange={(event) =>
                             handlePopularRouteImageUpload(index, event)
                           }
