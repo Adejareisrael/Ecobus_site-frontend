@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTokenFromRequest } from "@/lib/auth";
-import { getUnavailableSelectedSeats } from "@/lib/seat-availability";
+import { getUnavailableSelectedSeats, withSeatLock } from "@/lib/seat-availability";
 import { normalizeTravelDate } from "@/lib/travel-date";
 import {
   formatPromoCode,
@@ -9,6 +9,18 @@ import {
   validatePromoForTotal,
 } from "@/lib/promo-codes";
 import { enqueueTicketDeliveries } from "@/lib/ticket-delivery";
+
+class SeatConflictError extends Error {
+  constructor(public readonly seats: string[]) {
+    super(`Seat${seats.length > 1 ? "s" : ""} already booked: ${seats.join(", ")}`);
+  }
+}
+
+class PromoConflictError extends Error {
+  constructor() {
+    super("Promo code has reached its usage limit");
+  }
+}
 
 type PaystackVerifyResponse = {
   status: boolean;
@@ -33,6 +45,7 @@ export async function POST(req: NextRequest) {
     const bookingTotal = trip.price * seats.length;
     let discountAmount = 0;
     let normalizedPromoCode: string | null = null;
+    let promoMaxUses: number | null = null;
 
     if (promoCode) {
       normalizedPromoCode = normalizePromoCode(String(promoCode));
@@ -48,6 +61,8 @@ export async function POST(req: NextRequest) {
       if ("error" in result) {
         return NextResponse.json({ error: result.error }, { status: 400 });
       }
+
+      promoMaxUses = promo.maxUses;
 
       discountAmount = result.discountAmount;
     }
@@ -103,51 +118,75 @@ export async function POST(req: NextRequest) {
 
     const payload = getTokenFromRequest(req);
     const bookingRef = `ECO-${Math.floor(100000 + Math.random() * 900000)}`;
-    const unavailableSeats = await getUnavailableSelectedSeats(
-      trip.id,
-      seats,
-      bookingTravelDate
-    );
 
-    if (unavailableSeats.length > 0) {
-      return NextResponse.json(
-        {
-          error: `Seat${unavailableSeats.length > 1 ? "s" : ""} already booked: ${unavailableSeats.join(", ")}`,
-        },
-        { status: 409 }
+    let booking;
+    try {
+      booking = await prisma.$transaction(async (tx) =>
+        withSeatLock(tx, trip.id, bookingTravelDate, async () => {
+          const unavailableSeats = await getUnavailableSelectedSeats(
+            trip.id,
+            seats,
+            bookingTravelDate,
+            tx
+          );
+
+          if (unavailableSeats.length > 0) {
+            throw new SeatConflictError(unavailableSeats);
+          }
+
+          const created = await tx.booking.create({
+            data: {
+              reference: bookingRef,
+              paystackRef: reference,
+              tripId: trip.id,
+              travelDate: bookingTravelDate,
+              routeLabel: trip.routeLabel,
+              departureTime: trip.departureTime,
+              busType: trip.busType,
+              price: trip.price,
+              promoCode: normalizedPromoCode,
+              discountAmount,
+              seatsJson: JSON.stringify(seats),
+              passengerName: passenger.fullName,
+              passengerPhone: passenger.phone,
+              passengerEmail: passenger.email,
+              userId: payload?.userId ?? null,
+              status: "Confirmed",
+              paymentStatus: "Paid",
+              amountPaid: expectedKobo,
+              currency: "NGN",
+              paidAt: new Date(),
+            },
+          });
+
+          if (normalizedPromoCode) {
+            // Atomic conditional increment: only succeeds if usedCount is still
+            // under the limit at the moment of the update, so two concurrent
+            // bookings can't both slip in under a promo's last remaining use.
+            const promoUpdate = await tx.promoCode.updateMany({
+              where:
+                promoMaxUses === null
+                  ? { code: normalizedPromoCode }
+                  : { code: normalizedPromoCode, usedCount: { lt: promoMaxUses } },
+              data: { usedCount: { increment: 1 } },
+            });
+
+            if (promoUpdate.count === 0) {
+              throw new PromoConflictError();
+            }
+          }
+
+          return created;
+        })
       );
-    }
-
-    const booking = await prisma.booking.create({
-      data: {
-        reference: bookingRef,
-        paystackRef: reference,
-        tripId: trip.id,
-        travelDate: bookingTravelDate,
-        routeLabel: trip.routeLabel,
-        departureTime: trip.departureTime,
-        busType: trip.busType,
-        price: trip.price,
-        promoCode: normalizedPromoCode,
-        discountAmount,
-        seatsJson: JSON.stringify(seats),
-        passengerName: passenger.fullName,
-        passengerPhone: passenger.phone,
-        passengerEmail: passenger.email,
-        userId: payload?.userId ?? null,
-        status: "Confirmed",
-        paymentStatus: "Paid",
-        amountPaid: expectedKobo,
-        currency: "NGN",
-        paidAt: new Date(),
-      },
-    });
-
-    if (normalizedPromoCode) {
-      await prisma.promoCode.update({
-        where: { code: normalizedPromoCode },
-        data: { usedCount: { increment: 1 } },
-      });
+    } catch (error) {
+      if (error instanceof SeatConflictError) {
+        return NextResponse.json({ error: error.message }, { status: 409 });
+      }
+      if (error instanceof PromoConflictError) {
+        return NextResponse.json({ error: error.message }, { status: 409 });
+      }
+      throw error;
     }
 
     await enqueueTicketDeliveries(booking, new URL(req.url).origin);

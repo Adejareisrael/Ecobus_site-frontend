@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { generateSeats } from "./mock-data";
 import { Seat, Trip } from "./types";
@@ -5,11 +6,14 @@ import { formatBusLayout, toyotaLayoutId } from "./bus-layouts";
 
 const blockingStatuses = ["Pending", "Confirmed"];
 
+type Db = typeof prisma | Prisma.TransactionClient;
+
 export async function getBookedSeatLabels(
   tripId: string,
-  travelDate: string
+  travelDate: string,
+  db: Db = prisma
 ): Promise<Set<string>> {
-  const bookings = await prisma.booking.findMany({
+  const bookings = await db.booking.findMany({
     where: {
       tripId,
       travelDate,
@@ -26,10 +30,28 @@ export async function getBookedSeatLabels(
 export async function getUnavailableSelectedSeats(
   tripId: string,
   selectedSeats: string[],
-  travelDate: string
+  travelDate: string,
+  db: Db = prisma
 ): Promise<string[]> {
-  const bookedSeats = await getBookedSeatLabels(tripId, travelDate);
+  const bookedSeats = await getBookedSeatLabels(tripId, travelDate, db);
   return selectedSeats.filter((seat) => bookedSeats.has(seat));
+}
+
+/**
+ * Serializes concurrent booking attempts for the same trip + travel date so
+ * the seat-availability check and the booking insert can't race each other.
+ * Postgres advisory locks are session/transaction scoped, not tied to any
+ * table, so this doesn't require a schema change.
+ */
+export async function withSeatLock<T>(
+  tx: Prisma.TransactionClient,
+  tripId: string,
+  travelDate: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  const lockKey = `${tripId}:${travelDate}`;
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey})::bigint)`;
+  return fn();
 }
 
 export async function getDbSeatsForTrip(

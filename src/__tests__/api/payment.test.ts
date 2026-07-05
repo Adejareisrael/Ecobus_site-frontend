@@ -247,6 +247,40 @@ describe("POST /api/payment/verify", () => {
     expect(res2.status).toBe(201);
   });
 
+  it("only lets one of two concurrent requests for the same seat succeed", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(() =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
+              status: true,
+              message: "Verification successful",
+              data: { status: "success", amount: EXPECTED_KOBO, currency: "NGN" },
+            })
+          )
+        )
+      )
+    );
+
+    const [res1, res2] = await Promise.all([
+      verify(r(validBody("ps-ref-race-1"))),
+      verify(r(validBody("ps-ref-race-2"))),
+    ]);
+
+    const statuses = [res1.status, res2.status].sort();
+    expect(statuses).toEqual([201, 409]);
+
+    const confirmedCount = await prisma.booking.count({
+      where: {
+        tripId: TEST_TRIP.id,
+        travelDate: TEST_TRAVEL_DATE,
+        status: "Confirmed",
+      },
+    });
+    expect(confirmedCount).toBe(1);
+  });
+
   it("returns 400 when reference is missing", async () => {
     const res = await verify(r({ trip: TEST_TRIP, seats: TEST_SEATS, passenger: TEST_PASSENGER }));
     expect(res.status).toBe(400);
@@ -336,6 +370,57 @@ describe("POST /api/payment/verify", () => {
 
     expect(res.status).toBe(402);
     expect(data.error).toMatch(/amount/i);
+  });
+
+  it("only lets one of two concurrent bookings redeem a single-use promo code", async () => {
+    await prisma.promoCode.create({
+      data: {
+        code: "RACEPROMO",
+        discountType: "percentage",
+        discountValue: 10,
+        minSpend: 0,
+        maxUses: 1,
+        isActive: true,
+      },
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(() =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
+              status: true,
+              message: "Verification successful",
+              data: { status: "success", amount: EXPECTED_KOBO * 0.9, currency: "NGN" },
+            })
+          )
+        )
+      )
+    );
+
+    const [res1, res2] = await Promise.all([
+      verify(
+        r({
+          ...validBody("ps-ref-promo-race-1"),
+          seats: ["A1", "A2"],
+          promoCode: "racepromo",
+        })
+      ),
+      verify(
+        r({
+          ...validBody("ps-ref-promo-race-2"),
+          seats: ["B1", "B2"],
+          promoCode: "racepromo",
+        })
+      ),
+    ]);
+
+    const statuses = [res1.status, res2.status].sort();
+    expect(statuses).toEqual([201, 409]);
+
+    const promo = await prisma.promoCode.findUnique({ where: { code: "RACEPROMO" } });
+    expect(promo?.usedCount).toBe(1);
   });
 });
 
