@@ -3,11 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import QRCode from "qrcode";
+import { Share2 } from "lucide-react";
 import { Booking } from "@/lib/types";
 import { useBookingStore } from "@/store/booking-store";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatNaira, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
+import { cacheTicket, getCachedTicket } from "@/lib/offline-tickets";
+import { shareTicket } from "@/lib/native-share";
 
 export default function ConfirmationPage() {
   const router = useRouter();
@@ -22,6 +25,7 @@ export default function ConfirmationPage() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [loading, setLoading] = useState(!storedBooking);
   const [error, setError] = useState(false);
+  const [fromOfflineCache, setFromOfflineCache] = useState(false);
 
   useEffect(() => {
     if (storedBooking) {
@@ -33,8 +37,21 @@ export default function ConfirmationPage() {
         if (!res.ok) throw new Error("Not found");
         return res.json() as Promise<Booking>;
       })
-      .then((data) => setBooking(data))
-      .catch(() => setError(true))
+      .then((data) => {
+        setBooking(data);
+        setFromOfflineCache(false);
+      })
+      .catch(() => {
+        void getCachedTicket(bookingId).then((cached) => {
+          if (cached) {
+            setBooking(cached.booking);
+            setQrCodeUrl(cached.qrCodeUrl);
+            setFromOfflineCache(true);
+          } else {
+            setError(true);
+          }
+        });
+      })
       .finally(() => setLoading(false));
   }, [bookingId, storedBooking]);
 
@@ -47,13 +64,27 @@ export default function ConfirmationPage() {
   const total = getDiscountedTotal(subtotal, discountAmount);
 
   useEffect(() => {
-    if (!booking) return;
+    if (!booking || fromOfflineCache) return;
 
     const ticketUrl = `${window.location.origin}/confirmation/${booking.id}?ref=${encodeURIComponent(booking.reference)}`;
     QRCode.toDataURL(ticketUrl, { margin: 1, width: 220 })
-      .then(setQrCodeUrl)
+      .then((dataUrl) => {
+        setQrCodeUrl(dataUrl);
+        void cacheTicket(booking, dataUrl);
+      })
       .catch(() => setQrCodeUrl(""));
-  }, [booking]);
+  }, [booking, fromOfflineCache]);
+
+  const shareCurrentTicket = async () => {
+    if (!booking) return;
+
+    const ticketUrl = `${window.location.origin}/confirmation/${booking.id}?ref=${encodeURIComponent(booking.reference)}`;
+    await shareTicket({
+      title: `Ecobus ticket ${booking.reference}`,
+      text: `Ecobus ticket ${booking.reference}\n${booking.trip.routeLabel}\n${booking.travelDate} · ${booking.trip.departureTime}\nSeat(s): ${booking.seats.join(", ")}`,
+      url: ticketUrl,
+    });
+  };
 
   const downloadTicket = async () => {
     if (!booking || !qrCodeUrl) return;
@@ -186,6 +217,12 @@ export default function ConfirmationPage() {
           ✔ Booking Confirmed
         </div>
 
+        {fromOfflineCache && (
+          <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-1 text-sm text-amber-700">
+            Showing a saved offline copy — reconnect to see the latest status
+          </div>
+        )}
+
         <h1 className="text-2xl lg:text-3xl font-bold text-ecobus-purple">
           Your Ecobus ticket is ready
         </h1>
@@ -264,9 +301,13 @@ export default function ConfirmationPage() {
       </Card>
 
       {/* ACTIONS */}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Button onClick={downloadTicket} className="w-full" disabled={!qrCodeUrl}>
           Download
+        </Button>
+        <Button variant="secondary" className="gap-2" onClick={shareCurrentTicket}>
+          <Share2 className="h-4 w-4" />
+          Share
         </Button>
         <Button variant="secondary" onClick={() => window.print()}>
           Print

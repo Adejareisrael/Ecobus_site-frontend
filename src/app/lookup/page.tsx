@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { uppercaseCodeInput } from "@/lib/form-input";
 import { useAuthStore } from "@/store/auth-store";
+import { CachedTicket, getCachedTickets, isNativePlatform } from "@/lib/offline-tickets";
 
 type LookupResult = {
   id: string;
@@ -40,7 +41,13 @@ function BookingLookupContent() {
   const [results, setResults] = useState<LookupResult[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [savedTickets, setSavedTickets] = useState<CachedTicket[]>([]);
   const isLoggedIn = hydrated && Boolean(user && token);
+
+  useEffect(() => {
+    if (!isNativePlatform()) return;
+    void getCachedTickets().then(setSavedTickets);
+  }, []);
 
   const searchBookings = useCallback(async () => {
     setLoading(true);
@@ -159,6 +166,47 @@ function BookingLookupContent() {
           </div>
         )}
       </Card>
+
+      {savedTickets.length > 0 && (
+        <Card className="mt-6 p-5">
+          <h2 className="font-semibold">Saved on this device</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Available even without an internet connection.
+          </p>
+
+          <div className="mt-4 grid gap-3">
+            {savedTickets.map(({ booking }) => (
+              <div
+                key={booking.id}
+                className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm"
+              >
+                <div className="grid gap-2">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-slate-500">Reference</span>
+                    <strong>{booking.reference}</strong>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-slate-500">Route</span>
+                    <strong>{booking.trip.routeLabel}</strong>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-slate-500">Date</span>
+                    <strong>{booking.travelDate}</strong>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-slate-500">Seats</span>
+                    <strong>{booking.seats.join(", ")}</strong>
+                  </div>
+                </div>
+
+                <Link href={`/confirmation/${booking.id}`}>
+                  <Button className="mt-4 w-full">Open ticket</Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
