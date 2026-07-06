@@ -51,6 +51,10 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline';",
               "img-src 'self' data: blob: https:;",
               "connect-src 'self' https://api.paystack.co https://apis.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com;",
+              // Firebase Auth's popup sign-in flow loads a hidden iframe on
+              // <project>.firebaseapp.com (its default authDomain) to relay
+              // the result back from the Google OAuth popup.
+              "frame-src https://*.firebaseapp.com;",
               "frame-ancestors 'none';",
               "base-uri 'self';",
               "form-action 'self' https://*.paystack.com;",
