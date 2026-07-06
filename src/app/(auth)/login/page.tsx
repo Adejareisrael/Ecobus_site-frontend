@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth-store";
 import { Eye, EyeOff } from "lucide-react";
 import type { User } from "@/store/auth-store";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -96,6 +97,14 @@ export default function LoginPage() {
       >
         {loading ? "Signing in..." : "Login"}
       </Button>
+
+      <div className="flex items-center gap-3 text-xs text-slate-400">
+        <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+        or
+        <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+      </div>
+
+      <GoogleSignInButton onError={setError} />
 
       <p className="text-sm text-center text-slate-500">
         Don&apos;t have an account?{" "}

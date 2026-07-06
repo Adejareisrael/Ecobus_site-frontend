@@ -23,6 +23,27 @@ vi.mock("@capacitor/share", () => ({
   Share: { share: shareMock },
 }));
 
+const nativeSignInWithGoogle = vi.fn();
+const nativeGetIdToken = vi.fn();
+vi.mock("@capacitor-firebase/authentication", () => ({
+  FirebaseAuthentication: {
+    signInWithGoogle: (...args: unknown[]) => nativeSignInWithGoogle(...args),
+    getIdToken: (...args: unknown[]) => nativeGetIdToken(...args),
+  },
+}));
+
+const webSignInWithPopup = vi.fn();
+vi.mock("firebase/app", () => ({
+  initializeApp: vi.fn(() => ({})),
+  getApps: vi.fn(() => []),
+  getApp: vi.fn(() => ({})),
+}));
+vi.mock("firebase/auth", () => ({
+  getAuth: vi.fn(() => ({})),
+  GoogleAuthProvider: vi.fn(),
+  signInWithPopup: (...args: unknown[]) => webSignInWithPopup(...args),
+}));
+
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
   return {
     id: overrides.id ?? "booking-1",
@@ -183,5 +204,43 @@ describe("native-share", () => {
     const result = await shareTicket({ title: "t", text: "body", url: "https://x.test" });
 
     expect(result).toEqual({ shared: false });
+  });
+});
+
+describe("firebase-client", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    nativeSignInWithGoogle.mockReset();
+    nativeGetIdToken.mockReset();
+    webSignInWithPopup.mockReset();
+  });
+
+  it("uses the native Google Sign-In SDK on a native platform, not the web popup", async () => {
+    const { Capacitor } = await import("@capacitor/core");
+    vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+    nativeSignInWithGoogle.mockResolvedValue({ user: {}, credential: null, additionalUserInfo: null });
+    nativeGetIdToken.mockResolvedValue({ token: "native-firebase-id-token" });
+
+    const { signInWithGoogle } = await import("@/lib/firebase-client");
+    const result = await signInWithGoogle();
+
+    expect(nativeSignInWithGoogle).toHaveBeenCalled();
+    expect(webSignInWithPopup).not.toHaveBeenCalled();
+    expect(result).toEqual({ idToken: "native-firebase-id-token" });
+  });
+
+  it("uses the web popup flow on non-native platforms, not the native SDK", async () => {
+    const { Capacitor } = await import("@capacitor/core");
+    vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+    webSignInWithPopup.mockResolvedValue({
+      user: { getIdToken: vi.fn().mockResolvedValue("web-firebase-id-token") },
+    });
+
+    const { signInWithGoogle } = await import("@/lib/firebase-client");
+    const result = await signInWithGoogle();
+
+    expect(webSignInWithPopup).toHaveBeenCalled();
+    expect(nativeSignInWithGoogle).not.toHaveBeenCalled();
+    expect(result).toEqual({ idToken: "web-firebase-id-token" });
   });
 });

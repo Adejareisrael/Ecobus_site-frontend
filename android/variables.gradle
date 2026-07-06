@@ -13,4 +13,9 @@ ext {
     androidxJunitVersion = '1.3.0'
     androidxEspressoCoreVersion = '3.7.0'
     cordovaAndroidVersion = '14.0.1'
+
+    // Without this, @capacitor-firebase/authentication only declares the Google
+    // Sign-In native libraries as compileOnly — the app builds fine but the
+    // classes are missing at runtime, so signInWithGoogle() would fail on device.
+    rgcfaIncludeGoogle = true
 }
