@@ -3,6 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   devIndicators: false,
   poweredByHeader: false,
+  // firebase-admin's auth module pulls in jwks-rsa, which does a CommonJS
+  // require() of jose's ESM-only build. Turbopack's production bundler tries
+  // to statically bundle that and fails with ERR_REQUIRE_ESM; leaving the
+  // package external lets Node's own require/import interop handle it at
+  // runtime instead, which works fine.
+  serverExternalPackages: ["firebase-admin"],
   async headers() {
     // apis.google.com serves the Google API loader script Firebase Auth's
     // Google sign-in popup injects at runtime; without it the popup fails
