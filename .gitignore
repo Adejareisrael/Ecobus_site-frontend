@@ -46,3 +46,10 @@ next-env.d.ts
 *.db-shm
 *.db-wal
 .claude/
+
+# native build artifacts
+android/.idea/
+android/app/release/
+android/**/build/
+ios/**/DerivedData/
+ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/

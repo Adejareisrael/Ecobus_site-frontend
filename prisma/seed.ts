@@ -12,16 +12,7 @@ async function main() {
   for (const terminal of terminals) {
     await prisma.terminal.upsert({
       where: { id: terminal.id },
-      update: {
-        name: terminal.name,
-        city: terminal.city,
-        state: terminal.state,
-        address: terminal.address ?? "",
-        phone: terminal.phone ?? "",
-        hours: terminal.hours ?? "",
-        mapUrl: terminal.mapUrl ?? "",
-        facilitiesJson: JSON.stringify(terminal.facilities ?? []),
-      },
+      update: {},
       create: {
         id: terminal.id,
         name: terminal.name,
@@ -38,33 +29,17 @@ async function main() {
 
   await prisma.busLayout.upsert({
     where: { id: defaultToyotaLayout.id },
-    update: busLayoutToDbInput(defaultToyotaLayout),
+    update: {},
     create: {
       id: defaultToyotaLayout.id,
       ...busLayoutToDbInput(defaultToyotaLayout),
     },
   });
 
-  await prisma.trip.deleteMany({
-    where: { id: { notIn: trips.map((trip) => trip.id) } },
-  });
-
   for (const trip of trips) {
     await prisma.trip.upsert({
       where: { id: trip.id },
-      update: {
-        departureTerminalId: trip.departureTerminalId,
-        destinationTerminalId: trip.destinationTerminalId,
-        routeLabel: trip.routeLabel,
-        departureTime: trip.departureTime,
-        arrivalTime: trip.arrivalTime,
-        price: trip.price,
-        availableSeats: trip.availableSeats,
-        busType: trip.busType,
-        busLayoutId: trip.busLayoutId ?? null,
-        amenitiesJson: JSON.stringify(trip.amenities ?? []),
-        isActive: trip.isActive ?? true,
-      },
+      update: {},
       create: {
         id: trip.id,
         departureTerminalId: trip.departureTerminalId,
@@ -84,11 +59,7 @@ async function main() {
 
   await prisma.siteSettings.upsert({
     where: { id: "site" },
-    update: {
-      ...siteSettingsFields,
-      popularRoutesJson: JSON.stringify(popularRoutes),
-      popularRouteImagesJson: JSON.stringify(popularRouteImages),
-    },
+    update: {},
     create: {
       id: "site",
       ...siteSettingsFields,
@@ -100,7 +71,7 @@ async function main() {
   const adminPw = await bcrypt.hash("Admin123", 10);
   await prisma.user.upsert({
     where: { email: "admin@ecobus.ng" },
-    update: {},
+    update: { role: "admin" },
     create: { name: "Admin", email: "admin@ecobus.ng", password: adminPw, role: "admin" },
   });
 
@@ -111,7 +82,7 @@ async function main() {
     create: { name: "Demo User", email: "demo@ecobus.ng", password: demoPw },
   });
 
-  console.log("✅ Seeded: admin@ecobus.ng / Admin123  |  demo@ecobus.ng / Demo1234");
+  console.log("Seeded missing defaults without deleting production data.");
 }
 
 main()
