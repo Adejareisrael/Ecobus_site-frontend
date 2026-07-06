@@ -5,10 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "prisma generate && prisma migrate deploy && tsx prisma/seed.ts && next build",
+    "vercel-build": "prisma generate && DATABASE_URL=${DIRECT_URL:-$DATABASE_URL} prisma migrate deploy && tsx prisma/seed.ts && next build",
     "start": "next start",
     "lint": "eslint",
-    "db:setup": "prisma generate && prisma migrate deploy",
+    "db:setup": "prisma generate && DATABASE_URL=${DIRECT_URL:-$DATABASE_URL} prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "mobile:sync": "node scripts/generate-mobile-shell-config.mjs && cap sync",
     "mobile:android": "cap open android",
