@@ -63,8 +63,8 @@ export default function HirePage() {
     <main className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
       <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
         <div className="space-y-5">
-          <p className="text-sm font-medium text-ecobus-red">Vehicle hire</p>
-          <h1 className="text-3xl font-bold lg:text-5xl">Hire an Ecobus for private movement</h1>
+          <h1 className="text-3xl font-bold text-ecobus-red lg:text-5xl">Vehicle hire</h1>
+          <p className="text-lg font-medium lg:text-xl">Hire an Ecobus for private movement</p>
           <p className="text-slate-600">
             Request AC buses for corporate trips, schools, churches, weddings, events, or group travel.
             Our team will confirm vehicle availability, pricing, and pickup details.
