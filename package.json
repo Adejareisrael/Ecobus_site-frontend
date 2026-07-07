@@ -22,7 +22,8 @@
   },
   "overrides": {
     "@hono/node-server": "^1.19.13",
-    "postcss": "$postcss"
+    "postcss": "$postcss",
+    "jose": "5.10.0"
   },
   "dependencies": {
     "@capacitor-firebase/authentication": "^8.3.0",
