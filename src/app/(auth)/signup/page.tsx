@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth-store";
+import { Eye, EyeOff } from "lucide-react";
 import type { User } from "@/store/auth-store";
 import { phoneInput } from "@/lib/form-input";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
@@ -16,6 +17,7 @@ export default function SignupPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ fullName: "", email: "", phone: "", password: "" });
 
   const handleSignup = async () => {
@@ -83,12 +85,21 @@ export default function SignupPage() {
           value={form.phone}
           onChange={(e) => setForm({ ...form, phone: phoneInput(e.target.value) })}
         />
-        <Input
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+        <div className="relative">
+          <Input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
 
       <Button
