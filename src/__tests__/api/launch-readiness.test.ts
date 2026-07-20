@@ -157,7 +157,6 @@ describe("trip seat availability API", () => {
     await prisma.booking.create({
       data: {
         reference: "ECO-SEAT-DATE",
-        paystackRef: "seat-date-ref",
         tripId: "trip-001",
         travelDate: "2026-05-27",
         routeLabel: "Lagos (Fadeyi) → Benin",

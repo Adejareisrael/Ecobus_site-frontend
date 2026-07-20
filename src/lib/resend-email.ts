@@ -47,21 +47,21 @@ function buildTicketEmailHtml(input: SendTicketEmailInput) {
       <div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
         <div style="background:#2563eb;color:#ffffff;padding:24px;">
           <p style="margin:0;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;">Ecobus ticket</p>
-          <h1 style="margin:8px 0 0;font-size:26px;">Booking confirmed</h1>
+          <h1 style="margin:8px 0 0;font-size:26px;">Reservation held</h1>
         </div>
         <div style="padding:24px;">
-          <p style="margin:0 0 16px;">Hello ${escapeHtml(input.booking.passengerName)}, your Ecobus trip is confirmed.</p>
+          <p style="margin:0 0 16px;">Hello ${escapeHtml(input.booking.passengerName)}, your Ecobus seat is reserved. Pay the amount due in cash when you check in at the terminal.</p>
           <table style="width:100%;border-collapse:collapse;margin:0 0 20px;">
             <tr><td style="padding:8px 0;color:#64748b;">Reference</td><td style="padding:8px 0;text-align:right;font-weight:700;">${escapeHtml(input.booking.reference)}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b;">Route</td><td style="padding:8px 0;text-align:right;">${escapeHtml(input.booking.routeLabel)}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b;">Date</td><td style="padding:8px 0;text-align:right;">${escapeHtml(input.booking.travelDate)}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b;">Departure</td><td style="padding:8px 0;text-align:right;">${escapeHtml(input.booking.departureTime)}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b;">Seat(s)</td><td style="padding:8px 0;text-align:right;">${escapeHtml(seats.join(", "))}</td></tr>
-            <tr><td style="padding:8px 0;color:#64748b;">Total paid</td><td style="padding:8px 0;text-align:right;font-weight:700;">${formatNaira(total)}</td></tr>
+            <tr><td style="padding:8px 0;color:#64748b;">Amount due</td><td style="padding:8px 0;text-align:right;font-weight:700;">${formatNaira(total)}</td></tr>
           </table>
           <p style="margin:0 0 14px;">Use the button below to open your ticket and QR code.</p>
           <a href="${escapeHtml(input.ticketUrl)}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:12px;padding:12px 18px;font-weight:700;">Open ticket</a>
-          <p style="margin:18px 0 0;color:#64748b;font-size:13px;">A QR code image is also attached to this email for check-in.</p>
+          <p style="margin:18px 0 0;color:#64748b;font-size:13px;">A QR code image is also attached to this email for check-in and payment at the terminal.</p>
         </div>
       </div>
     </div>

@@ -36,7 +36,7 @@ Route: ${booking.routeLabel}
 Date: ${booking.travelDate}
 Departure: ${booking.departureTime}
 Seat(s): ${seats.join(", ")}
-Total paid: ${formatNaira(total)}
+Amount due: ${formatNaira(total)}
 Ticket: ${ticketUrl}`;
 }
 

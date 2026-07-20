@@ -73,7 +73,7 @@ export default function DashboardPage() {
   );
 
   const activeTrips = bookings.filter(
-    (b) => b.status === "Confirmed"
+    (b) => ["Pending", "Confirmed"].includes(b.status)
   ).length;
 
   const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -342,7 +342,7 @@ export default function DashboardPage() {
 
               </div>
 
-              {booking.status === "Confirmed" && (
+              {["Pending", "Confirmed"].includes(booking.status) && (
                 <div className="mt-4 border-t pt-4">
                   {changeRequest.bookingId === booking.id ? (
                     <form onSubmit={submitChangeRequest} className="grid gap-3 md:grid-cols-[160px_180px_1fr_auto]">

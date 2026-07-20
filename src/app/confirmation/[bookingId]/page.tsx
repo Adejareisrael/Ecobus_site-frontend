@@ -63,6 +63,12 @@ export default function ConfirmationPage() {
   const discountAmount = booking?.discountAmount ?? 0;
   const total = getDiscountedTotal(subtotal, discountAmount);
 
+  const statusLabel = (status: string) => {
+    if (status === "Pending") return "Pending – Pay at Terminal";
+    if (status === "Confirmed") return "Confirmed – Paid";
+    return status;
+  };
+
   useEffect(() => {
     if (!booking || fromOfflineCache) return;
 
@@ -166,8 +172,8 @@ export default function ConfirmationPage() {
 
     drawRoundRect(96, 710, 708, 220, 18, "#ffffff", "#e2e8f0");
     drawLabelValue("Seat(s)", booking.seats.join(", "), 132, 770);
-    drawLabelValue("Status", booking.status, 484, 770);
-    drawLabelValue("Total paid", formatNaira(total), 132, 884);
+    drawLabelValue("Status", statusLabel(booking.status), 484, 770);
+    drawLabelValue("Amount due", formatNaira(total), 132, 884);
     if (discountAmount > 0) {
       drawLabelValue("Discount", formatNaira(discountAmount), 484, 884);
     }
@@ -214,7 +220,7 @@ export default function ConfirmationPage() {
       {/* SUCCESS BANNER */}
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1 text-sm text-emerald-600">
-          ✔ Booking Confirmed
+          {booking.status === "Confirmed" ? "✔ Checked In & Paid" : "✔ Reservation Held"}
         </div>
 
         {fromOfflineCache && (
@@ -228,7 +234,7 @@ export default function ConfirmationPage() {
         </h1>
 
         <p className="text-sm text-slate-600">
-          Present this ticket at the terminal before departure
+          Present this ticket at the terminal and pay the amount due before departure
         </p>
       </div>
 
@@ -271,7 +277,11 @@ export default function ConfirmationPage() {
               <strong>{booking.seats.join(", ")}</strong>
             </div>
             <div className="flex justify-between">
-              <span>Total Paid</span>
+              <span>Status</span>
+              <strong>{statusLabel(booking.status)}</strong>
+            </div>
+            <div className="flex justify-between">
+              <span>Amount due</span>
               <strong className="text-ecobus-red">{formatNaira(total)}</strong>
             </div>
             {discountAmount > 0 && (
@@ -281,6 +291,13 @@ export default function ConfirmationPage() {
               </div>
             )}
           </div>
+
+          {booking.status === "Pending" && (
+            <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+              Pay at the terminal — show this ticket to staff when you check in to confirm your
+              seat and complete payment.
+            </div>
+          )}
 
           <div className="flex justify-center">
             {qrCodeUrl ? (

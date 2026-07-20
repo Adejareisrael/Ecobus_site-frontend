@@ -89,14 +89,14 @@ export default function PassengerPage() {
         <div className="pt-2">
           <Button
             className="w-full lg:w-auto"
-            onClick={() => router.push("/payment")}
+            onClick={() => router.push("/review")}
             disabled={
               !passenger.fullName.trim() ||
               !passenger.phone.trim() ||
               !passenger.email.trim()
             }
           >
-            Proceed to payment
+            Review reservation
           </Button>
         </div>
 

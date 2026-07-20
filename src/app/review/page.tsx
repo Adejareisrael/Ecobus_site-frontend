@@ -8,16 +8,14 @@ import { BookingSummary } from "@/components/BookingSummary";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { AppliedPromo } from "@/lib/types";
+import { AppliedPromo, Booking } from "@/lib/types";
 import { uppercaseCodeInput } from "@/lib/form-input";
 import { formatNaira, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
 
-const PAYSTACK_PAGE_URL = process.env.NEXT_PUBLIC_PAYSTACK_PAGE_URL ?? "";
-const showDemoCheckout = process.env.NODE_ENV !== "production";
-
-export default function PaymentPage() {
+export default function ReviewPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [promoCode, setPromoCode] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoMessage, setPromoMessage] = useState("");
@@ -28,6 +26,7 @@ export default function PaymentPage() {
   const passenger = useBookingStore((s) => s.passenger);
   const appliedPromo = useBookingStore((s) => s.appliedPromo);
   const setAppliedPromo = useBookingStore((s) => s.setAppliedPromo);
+  const setLastBooking = useBookingStore((s) => s.setLastBooking);
   const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
@@ -64,26 +63,31 @@ export default function PaymentPage() {
     setPromoLoading(false);
   };
 
-  const handlePay = () => {
-    if (!PAYSTACK_PAGE_URL) return;
+  const confirmReservation = async () => {
     setLoading(true);
+    setErrorMessage("");
 
-    const reference = `ecobus-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-
-    const params = new URLSearchParams({
-      amount: String(finalTotal * 100), // kobo
-      email,
-      reference,
+    const res = await fetch("/api/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        trip,
+        travelDate,
+        seats,
+        passenger,
+        promoCode: appliedPromo?.code,
+      }),
     });
+    const data = await res.json();
 
-    // Redirect to Paystack hosted page — Paystack sends user back to
-    // the callback URL configured in the Paystack dashboard after payment
-    window.location.href = `${PAYSTACK_PAGE_URL}?${params.toString()}`;
-  };
+    if (!res.ok) {
+      setErrorMessage((data as { error?: string }).error ?? "Could not confirm reservation.");
+      setLoading(false);
+      return;
+    }
 
-  const handleDemoBooking = () => {
-    const reference = `demo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    router.push(`/payment/callback?reference=${reference}`);
+    setLastBooking(data as Booking);
+    router.push(`/confirmation/${(data as Booking).id}`);
   };
 
   return (
@@ -93,9 +97,9 @@ export default function PaymentPage() {
       <Card className="p-5 sm:p-6 space-y-6">
 
         <div className="space-y-1">
-          <h1 className="text-2xl lg:text-3xl font-bold">Payment</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold">Review reservation</h1>
           <p className="text-sm text-slate-500">
-            Secure payment powered by Paystack
+            Confirm your details, then pay in cash at the terminal.
           </p>
         </div>
 
@@ -137,39 +141,29 @@ export default function PaymentPage() {
           )}
         </div>
 
-        {/* PAYMENT INFO */}
+        {/* RESERVATION INFO */}
         <div className="rounded-xl border border-slate-200 p-4 space-y-2 bg-slate-50">
-          <p className="text-sm text-slate-500">Paying as</p>
+          <p className="text-sm text-slate-500">Reserving as</p>
           <p className="font-medium">{email || "—"}</p>
           <p className="text-xs text-slate-400">
-            Travel date: {travelDate || "Today"}. You will be redirected to Paystack to complete your payment securely.
+            Travel date: {travelDate || "Today"}. No payment is taken online — you&apos;ll pay
+            the amount due in cash when you check in at the terminal.
           </p>
         </div>
 
-        {!PAYSTACK_PAGE_URL && (
-          <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-            Payment is not configured yet. Add the Paystack payment URL before launch.
+        {errorMessage && (
+          <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {errorMessage}
           </div>
         )}
 
         <Button
           className="w-full bg-ecobus-red text-white"
-          onClick={handlePay}
-          disabled={loading || !PAYSTACK_PAGE_URL}
+          onClick={confirmReservation}
+          disabled={loading}
         >
-          {loading ? "Redirecting to Paystack..." : `Pay ₦${finalTotal.toLocaleString()}`}
+          {loading ? "Confirming..." : `Confirm reservation — ₦${finalTotal.toLocaleString()} due`}
         </Button>
-
-        {showDemoCheckout && (
-          <Button
-            className="w-full"
-            variant="ghost"
-            onClick={handleDemoBooking}
-            disabled={loading}
-          >
-            Complete demo booking
-          </Button>
-        )}
 
       </Card>
 

@@ -62,7 +62,6 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
     travelDate: "2026-08-01",
     seats: ["1", "2"],
     passenger: { fullName: "Test Passenger", phone: "08000000000", email: "test@ecobus.ng" },
-    paymentMethod: "Card",
     discountAmount: 0,
     createdAt: new Date().toISOString(),
     status: "Confirmed",

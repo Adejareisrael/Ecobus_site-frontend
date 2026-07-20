@@ -19,7 +19,7 @@ function formatTicketValidation(
   }
 ) {
   return {
-    valid: booking.status === "Confirmed",
+    valid: !["Cancelled", "Failed", "Refunded"].includes(booking.status),
     id: booking.id,
     reference: booking.reference,
     status: booking.status,
@@ -90,11 +90,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ valid: false, error: "Ticket not found" }, { status: 404 });
   }
 
-  if (booking.status !== "Confirmed") {
+  if (["Cancelled", "Failed", "Refunded"].includes(booking.status)) {
     return NextResponse.json(
       {
         ...formatTicketValidation(booking),
-        error: "Only confirmed tickets can be checked in.",
+        error: "This ticket cannot be checked in.",
       },
       { status: 409 }
     );
@@ -115,6 +115,7 @@ export async function POST(req: NextRequest) {
     data: {
       checkedInAt: new Date(),
       checkedInBy: admin.email,
+      ...(booking.status === "Pending" ? { status: "Confirmed" } : {}),
     },
   });
 

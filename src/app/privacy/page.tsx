@@ -2,7 +2,7 @@ export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">
       <h1 className="text-3xl font-bold">Privacy Policy</h1>
-      <p className="text-sm text-slate-500">Last updated: July 5, 2026</p>
+      <p className="text-sm text-slate-500">Last updated: July 20, 2026</p>
       <p className="text-slate-600">
         Ecobus Transport collects only the information needed to create,
         manage, verify, and support passenger bookings, vehicle hire requests,
@@ -14,8 +14,8 @@ export default function PrivacyPage() {
           We may collect passenger names, phone numbers, email addresses,
           passwords (stored as a one-way hash, never in plain text), booking
           references, selected seats, trip dates, route details, account
-          details, promo codes used, payment references, ticket validation and
-          check-in activity, and support messages.
+          details, promo codes used, ticket validation and check-in activity,
+          and support messages.
         </p>
         <p className="text-slate-600">
           If you request a vehicle hire or charter, we additionally collect
@@ -59,28 +59,30 @@ export default function PrivacyPage() {
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">How we use information</h2>
         <p className="text-slate-600">
-          We use this information to issue tickets, verify payments, prevent
-          duplicate seat bookings, confirm passenger check-in, arrange vehicle
-          hire, send booking updates, respond to support requests, prevent
-          misuse, and improve our transport services.
+          We use this information to issue tickets, hold seat reservations,
+          prevent duplicate seat bookings, confirm passenger check-in and
+          in-person payment at the terminal, arrange vehicle hire, send
+          booking updates, respond to support requests, prevent misuse, and
+          improve our transport services.
         </p>
       </section>
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">Payments</h2>
         <p className="text-slate-600">
-          Card and transfer processing is handled by Paystack or another
-          approved payment provider. Ecobus stores payment references, amounts,
-          status, and timestamps. We do not store full card details.
+          No online payment is processed through the website or app. Fares are
+          paid in person, in cash, at the terminal when the passenger checks
+          in. We do not collect or store card numbers, bank transfer details,
+          or any other payment credentials online.
         </p>
       </section>
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">Sharing and retention</h2>
         <p className="text-slate-600">
           We share information only with service providers needed to operate
-          the booking service: Paystack (payments), Resend (booking and
-          ticket emails), and our database and file storage provider, Supabase.
-          Booking records are retained for operational, customer support,
-          audit, fraud-prevention, and legal purposes.
+          the booking service: Resend (booking and ticket emails) and our
+          database and file storage provider, Supabase. Booking records are
+          retained for operational, customer support, audit, fraud-prevention,
+          and legal purposes.
         </p>
       </section>
       <section className="space-y-2">

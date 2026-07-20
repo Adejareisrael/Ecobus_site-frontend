@@ -2,14 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AppliedPromo, Booking, Passenger, Trip } from "@/lib/types";
 
-type PaymentMethod = "Card" | "Transfer";
-
 type BookingState = {
   selectedTrip: Trip | null;
   selectedTravelDate: string;
   selectedSeats: string[];
   passenger: Passenger;
-  paymentMethod: PaymentMethod;
   appliedPromo: AppliedPromo | null;
   lastBooking: Booking | null;
 
@@ -18,7 +15,6 @@ type BookingState = {
   toggleSeat: (seat: string) => void;
   clearSeats: () => void;
   setPassenger: (passenger: Partial<Passenger>) => void;
-  setPaymentMethod: (method: PaymentMethod) => void;
   setAppliedPromo: (promo: AppliedPromo | null) => void;
   setLastBooking: (booking: Booking | null) => void;
   resetFlow: () => void;
@@ -37,7 +33,6 @@ export const useBookingStore = create<BookingState>()(
       selectedTravelDate: "",
       selectedSeats: [],
       passenger: emptyPassenger,
-      paymentMethod: "Card",
       appliedPromo: null,
       lastBooking: null,
 
@@ -67,9 +62,6 @@ export const useBookingStore = create<BookingState>()(
           },
         })),
 
-      setPaymentMethod: (method) =>
-        set({ paymentMethod: method }),
-
       setAppliedPromo: (promo) =>
         set({ appliedPromo: promo }),
 
@@ -82,7 +74,6 @@ export const useBookingStore = create<BookingState>()(
           selectedTravelDate: "",
           selectedSeats: [],
           passenger: emptyPassenger,
-          paymentMethod: "Card",
           appliedPromo: null,
         }),
     }),

@@ -88,7 +88,6 @@ export type Booking = {
 
   passenger: Passenger;
 
-  paymentMethod: "Card" | "Transfer";
   promoCode?: string | null;
   discountAmount?: number;
 

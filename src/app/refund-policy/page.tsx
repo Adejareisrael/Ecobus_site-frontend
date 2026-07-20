@@ -2,17 +2,22 @@ export default function RefundPolicyPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">
       <h1 className="text-3xl font-bold">Refund Policy</h1>
-      <p className="text-sm text-slate-500">Last updated: June 2, 2026</p>
+      <p className="text-sm text-slate-500">Last updated: July 20, 2026</p>
       <p className="text-slate-600">
-        Refunds and trip changes are reviewed by Ecobus support based on the
-        trip status, payment status, and time remaining before departure.
+        No payment is collected online — fares are paid in cash at the
+        terminal at check-in. Refunds and trip changes are reviewed by Ecobus
+        support based on the trip status, reservation status, whether a fare
+        has already been paid at the terminal, and time remaining before
+        departure.
       </p>
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">Refund requests</h2>
         <p className="text-slate-600">
           Customers should contact support with their booking reference, phone
-          number, and reason for the request. Approved refunds are processed
-          through the original payment channel where possible.
+          number, and reason for the request. Cancelling an unpaid reservation
+          requires no refund, since no payment was taken online. If a fare has
+          already been paid in cash at the terminal, approved refunds are
+          issued in cash or as travel credit at that terminal.
         </p>
       </section>
       <section className="space-y-2">
@@ -34,9 +39,10 @@ export default function RefundPolicyPage() {
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">Payment reversals</h2>
         <p className="text-slate-600">
-          Approved refunds are processed to the original payment channel where
-          possible. Bank or payment-provider settlement timelines may vary after
-          Ecobus has approved and initiated the refund.
+          Since fares are paid in person at the terminal rather than online,
+          approved refunds for fares already paid are issued in cash or as
+          travel credit directly at the terminal where the payment was made,
+          not through a bank or online payment channel.
         </p>
       </section>
       <section className="space-y-2">

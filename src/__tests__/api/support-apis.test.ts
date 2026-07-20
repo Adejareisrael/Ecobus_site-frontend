@@ -166,7 +166,7 @@ describe("admin ticket validation", () => {
     expect(data.error).toMatch(/already/i);
   });
 
-  it("blocks check-in for non-confirmed tickets", async () => {
+  it("blocks check-in for cancelled tickets", async () => {
     const { token } = await createAdmin();
     const booking = await createBooking(null);
     await prisma.booking.update({
@@ -180,7 +180,24 @@ describe("admin ticket validation", () => {
     const data = await res.json();
 
     expect(res.status).toBe(409);
-    expect(data.error).toMatch(/confirmed/i);
+    expect(data.error).toMatch(/cannot be checked in/i);
+  });
+
+  it("checking in a pending reservation confirms it and marks the fare collected", async () => {
+    const { token } = await createAdmin();
+    const booking = await createBooking(null, { status: "Pending" });
+
+    const res = await checkInTicket(
+      rJson("/api/tickets/validate", "POST", { bookingId: booking.id }, token)
+    );
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.status).toBe("Confirmed");
+    expect(data.checkedIn).toBe(true);
+
+    const saved = await prisma.booking.findUnique({ where: { id: booking.id } });
+    expect(saved?.status).toBe("Confirmed");
   });
 });
 

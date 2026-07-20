@@ -9,7 +9,6 @@ export default defineConfig({
     fileParallelism: false,
     env: {
       JWT_SECRET: "test-jwt-secret-for-vitest-min-32-characters!!",
-      PAYSTACK_SECRET_KEY: "sk_test_fake_key_for_vitest",
       NODE_ENV: "test",
     },
     coverage: {

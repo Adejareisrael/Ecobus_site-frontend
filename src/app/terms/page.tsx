@@ -2,7 +2,7 @@ export default function TermsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">
       <h1 className="text-3xl font-bold">Terms of Service</h1>
-      <p className="text-sm text-slate-500">Last updated: July 5, 2026</p>
+      <p className="text-sm text-slate-500">Last updated: July 20, 2026</p>
       <p className="text-slate-600">
         By using the Ecobus Transport website or mobile app, creating an
         account, booking a trip, or submitting a vehicle hire request,
@@ -12,12 +12,16 @@ export default function TermsPage() {
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">Bookings</h2>
         <p className="text-slate-600">
-          A booking is confirmed after successful payment verification. Seat
-          availability is managed per trip and travel date. Customers are
-          responsible for checking route, terminal, travel date, passenger
-          details, and seat selections before payment. Promo codes are subject
-          to their own validity dates, minimum spend, and usage limits, and may
-          be withdrawn or changed at any time.
+          No online payment is taken through the website or app. Selecting
+          seats and submitting a booking reserves those seats and creates a
+          &quot;Pending&quot; reservation. Seat availability is managed per trip and
+          travel date. Customers are responsible for checking route, terminal,
+          travel date, passenger details, and seat selections before
+          confirming a reservation. Promo codes are subject to their own
+          validity dates, minimum spend, and usage limits, and may be
+          withdrawn or changed at any time. A reservation becomes a confirmed
+          booking only once the passenger checks in and pays the fare in cash
+          at the terminal.
         </p>
       </section>
       <section className="space-y-2">
@@ -65,8 +69,8 @@ export default function TermsPage() {
         <h2 className="text-xl font-semibold">Changes and cancellations</h2>
         <p className="text-slate-600">
           Trip changes, cancellations, and refunds are handled under the Ecobus
-          refund policy and may depend on route status, payment status, seat
-          availability, and time remaining before departure.
+          refund policy and may depend on route status, reservation status,
+          seat availability, and time remaining before departure.
         </p>
       </section>
       <section className="space-y-2">

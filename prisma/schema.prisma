@@ -31,11 +31,6 @@ model PasswordResetToken {
 model Booking {
   id             String   @id @default(cuid())
   reference      String   @unique
-  paystackRef    String   @unique
-  paymentStatus  String   @default("Paid")
-  amountPaid     Int?
-  currency       String   @default("NGN")
-  paidAt         DateTime?
   tripId         String
   travelDate     String   @default("")
   routeLabel     String
@@ -50,7 +45,7 @@ model Booking {
   passengerEmail String
   userId         String?
   user           User?    @relation(fields: [userId], references: [id])
-  status         String   @default("Confirmed")
+  status         String   @default("Pending")
   checkedInAt    DateTime?
   checkedInBy    String?
   changeRequests BookingChangeRequest[]

@@ -54,11 +54,13 @@ export async function createAdmin() {
   return createUser({ name: "Admin", email: "admin@ecobus.ng", role: "admin" });
 }
 
-export async function createBooking(userId: string | null, paystackRef?: string) {
+export async function createBooking(
+  userId: string | null,
+  overrides?: { status?: string }
+) {
   return prisma.booking.create({
     data: {
       reference: `ECO-${crypto.randomUUID()}`,
-      paystackRef: paystackRef ?? `ps-ref-${crypto.randomUUID()}`,
       tripId: "trip-1",
       travelDate: "2026-05-27",
       routeLabel: "Lagos → Abuja",
@@ -70,12 +72,10 @@ export async function createBooking(userId: string | null, paystackRef?: string)
       passengerPhone: "08012345678",
       passengerEmail: "john@test.com",
       userId,
-      status: "Confirmed",
+      status: overrides?.status ?? "Confirmed",
     },
   });
 }
-
-// ─── Paystack mock helpers ───────────────────────────────────────────────────
 
 export const TEST_TRIP = {
   id: "trip-1",
@@ -101,33 +101,3 @@ export const TEST_TRAVEL_DATE = "2026-05-27";
 
 // 2 seats × ₦5000 × 100 kobo = 1,000,000
 export const EXPECTED_KOBO = TEST_TRIP.price * TEST_SEATS.length * 100;
-
-export function stubPaystackSuccess(reference: string, amount = EXPECTED_KOBO) {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          status: true,
-          message: "Verification successful",
-          data: { status: "success", reference, amount, currency: "NGN" },
-        })
-      )
-    )
-  );
-}
-
-export function stubPaystackFailed() {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          status: false,
-          message: "Transaction not found",
-          data: { status: "failed", reference: "", amount: 0, currency: "NGN" },
-        })
-      )
-    )
-  );
-}
