@@ -20,6 +20,7 @@ export function PageTransition() {
     const shouldIgnoreLink = (link: HTMLAnchorElement) => {
       const href = link.getAttribute("href");
       if (!href || href.startsWith("#")) return true;
+      if (link.hasAttribute("download")) return true;
       if (link.target && link.target !== "_self") return true;
       if (href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("sms:")) {
         return true;
