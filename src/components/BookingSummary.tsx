@@ -1,7 +1,7 @@
 "use client";
 
 import { useBookingStore } from "@/store/booking-store";
-import { formatNaira, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
+import { formatNaira, formatTime12h, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
 import { Card } from "./ui/Card";
 
 export function BookingSummary() {
@@ -33,7 +33,7 @@ export function BookingSummary() {
         <div className="flex justify-between">
           <span>Departure</span>
           <span className="font-medium text-slate-900">
-            {trip.departureTime}
+            {formatTime12h(trip.departureTime)}
           </span>
         </div>
 

@@ -1,6 +1,6 @@
 import { prisma } from "./prisma";
 import { sendTicketEmail } from "./resend-email";
-import { formatNaira, getDiscountedTotal } from "./utils";
+import { formatNaira, formatTime12h, getDiscountedTotal } from "./utils";
 
 export type TicketDeliveryChannel = "email" | "whatsapp" | "sms";
 export type TicketDeliveryStatus = "Pending" | "Sent" | "Failed" | "Skipped";
@@ -34,7 +34,7 @@ export function buildTicketMessage(booking: BookingForDelivery, origin?: string 
 Passenger: ${booking.passengerName}
 Route: ${booking.routeLabel}
 Date: ${booking.travelDate}
-Departure: ${booking.departureTime}
+Departure: ${formatTime12h(booking.departureTime)}
 Seat(s): ${seats.join(", ")}
 Amount due: ${formatNaira(total)}
 Ticket: ${ticketUrl}`;

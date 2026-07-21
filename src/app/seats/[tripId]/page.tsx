@@ -12,6 +12,7 @@ import { BookingSummary } from "@/components/BookingSummary";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { normalizeTravelDate } from "@/lib/travel-date";
+import { formatTime12h } from "@/lib/utils";
 
 export default function SeatPage() {
   const router = useRouter();
@@ -77,7 +78,7 @@ export default function SeatPage() {
         </h1>
 
         <p className="mt-2 text-sm lg:text-base text-slate-600">
-          {trip.routeLabel} · {travelDate} · {trip.departureTime} departure
+          {trip.routeLabel} · {travelDate} · {formatTime12h(trip.departureTime)} departure
         </p>
 
         <div className="mt-6">

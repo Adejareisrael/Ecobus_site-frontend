@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Trip, Seat } from "@/lib/types";
-import { formatNaira } from "@/lib/utils";
+import { formatNaira, formatTime12h } from "@/lib/utils";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { useBookingStore } from "@/store/booking-store";
@@ -46,7 +46,7 @@ export function TripCard({ trip, travelDate }: Props) {
             <p className="text-sm text-slate-500">{trip.routeLabel}</p>
 
             <h3 className="mt-1 text-xl font-semibold">
-              {trip.departureTime} → {trip.arrivalTime}
+              {formatTime12h(trip.departureTime)} → {formatTime12h(trip.arrivalTime)}
             </h3>
 
             <p className="mt-1 text-sm text-slate-600">

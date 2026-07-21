@@ -4,7 +4,7 @@ import { MapPin, Phone, Clock, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { getDbTerminalById, getDbTrips } from "@/lib/server-data";
-import { formatNaira } from "@/lib/utils";
+import { formatNaira, formatTime12h } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -89,7 +89,7 @@ export default async function TerminalDetailsPage({
               <Card key={trip.id} className="p-5">
                 <p className="font-semibold">{trip.routeLabel}</p>
                 <p className="mt-1 text-sm text-slate-500">
-                  {trip.departureTime} to {trip.arrivalTime} · {trip.busType}
+                  {formatTime12h(trip.departureTime)} to {formatTime12h(trip.arrivalTime)} · {trip.busType}
                 </p>
                 <div className="mt-4 flex items-center justify-between">
                   <p className="font-bold text-ecobus-red">{formatNaira(trip.price)}</p>

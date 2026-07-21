@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Booking } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
-import { formatNaira, getBookingTotal } from "@/lib/utils";
+import { formatNaira, formatTime12h, getBookingTotal } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth-store";
@@ -302,7 +302,7 @@ export default function DashboardPage() {
                   </h2>
 
                   <p className="text-sm text-slate-500">
-                    {booking.trip.departureTime} • {booking.trip.busType}
+                    {formatTime12h(booking.trip.departureTime)} • {booking.trip.busType}
                   </p>
 
                   <p className="text-sm text-slate-600">

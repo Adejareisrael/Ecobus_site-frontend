@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { formatNaira } from "@/lib/utils";
+import { formatNaira, formatTime12h } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 import { positiveIntegerInput } from "@/lib/form-input";
 
@@ -439,7 +439,7 @@ export default function AdminTripsPage() {
                 <p className="font-semibold text-base">{trip.routeLabel}</p>
                 <p className="flex items-center gap-2 text-sm text-slate-500">
                   <CalendarClock className="h-4 w-4" />
-                  {trip.departureTime} {"->"} {trip.arrivalTime}
+                  {formatTime12h(trip.departureTime)} {"->"} {formatTime12h(trip.arrivalTime)}
                 </p>
               </div>
 

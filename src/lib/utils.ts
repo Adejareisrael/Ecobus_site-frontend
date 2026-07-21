@@ -37,3 +37,20 @@ export function getDiscountedTotal(total: number, discountAmount?: number | null
   const safeDiscount = typeof discountAmount === "number" ? discountAmount : 0;
   return Math.max(0, total - safeDiscount);
 }
+
+/**
+ * 🕐 Format a 24-hour "HH:mm" time string as 12-hour with AM/PM
+ */
+export function formatTime12h(time?: string | null) {
+  if (!time) return "";
+
+  const match = /^(\d{1,2}):(\d{2})/.exec(time.trim());
+  if (!match) return time;
+
+  const minute = match[2];
+  let hour = parseInt(match[1], 10);
+  const period = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+
+  return `${hour}:${minute} ${period}`;
+}

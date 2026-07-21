@@ -8,7 +8,7 @@ import { Booking } from "@/lib/types";
 import { useBookingStore } from "@/store/booking-store";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { formatNaira, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
+import { formatNaira, formatTime12h, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
 import { cacheTicket, getCachedTicket } from "@/lib/offline-tickets";
 import { shareTicket } from "@/lib/native-share";
 
@@ -87,7 +87,7 @@ export default function ConfirmationPage() {
     const ticketUrl = `${window.location.origin}/confirmation/${booking.id}?ref=${encodeURIComponent(booking.reference)}`;
     await shareTicket({
       title: `Ecobus ticket ${booking.reference}`,
-      text: `Ecobus ticket ${booking.reference}\n${booking.trip.routeLabel}\n${booking.travelDate} · ${booking.trip.departureTime}\nSeat(s): ${booking.seats.join(", ")}`,
+      text: `Ecobus ticket ${booking.reference}\n${booking.trip.routeLabel}\n${booking.travelDate} · ${formatTime12h(booking.trip.departureTime)}\nSeat(s): ${booking.seats.join(", ")}`,
       url: ticketUrl,
     });
   };
@@ -306,7 +306,7 @@ export default function ConfirmationPage() {
     ctx.fillStyle = MUTED;
     ctx.font = "500 20px Arial";
     ctx.textAlign = "center";
-    ctx.fillText(`${booking.travelDate} · ${booking.trip.departureTime} departure`, cardX + cardW / 2, lineY + 44);
+    ctx.fillText(`${booking.travelDate} · ${formatTime12h(booking.trip.departureTime)} departure`, cardX + cardW / 2, lineY + 44);
     ctx.textAlign = "left";
 
     // Passenger / trip info card
@@ -323,7 +323,7 @@ export default function ConfirmationPage() {
     drawFieldBadge("👤", "Passenger", booking.passenger.fullName, col1X, row1Y, colWidth);
     drawFieldBadge("📞", "Phone", booking.passenger.phone, col2X, row1Y, colWidth);
     drawFieldBadge("📅", "Travel date", booking.travelDate, col1X, row2Y, colWidth);
-    drawFieldBadge("🕐", "Departure", booking.trip.departureTime, col2X, row2Y, colWidth);
+    drawFieldBadge("🕐", "Departure", formatTime12h(booking.trip.departureTime), col2X, row2Y, colWidth);
 
     // Perforation divider
     const perfY = infoY + infoH + 30;
@@ -473,7 +473,7 @@ export default function ConfirmationPage() {
           <div className="text-center space-y-1">
             <p className="text-lg font-semibold">{booking.trip.routeLabel}</p>
             <p className="text-sm text-slate-500">
-              Date: {booking.travelDate} · Departure: {booking.trip.departureTime}
+              Date: {booking.travelDate} · Departure: {formatTime12h(booking.trip.departureTime)}
             </p>
           </div>
 

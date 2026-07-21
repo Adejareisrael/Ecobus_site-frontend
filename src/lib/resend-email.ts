@@ -1,5 +1,5 @@
 import QRCode from "qrcode";
-import { formatNaira, getDiscountedTotal } from "./utils";
+import { formatNaira, formatTime12h, getDiscountedTotal } from "./utils";
 
 type TicketEmailBooking = {
   id: string;
@@ -55,7 +55,7 @@ function buildTicketEmailHtml(input: SendTicketEmailInput) {
             <tr><td style="padding:8px 0;color:#64748b;">Reference</td><td style="padding:8px 0;text-align:right;font-weight:700;">${escapeHtml(input.booking.reference)}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b;">Route</td><td style="padding:8px 0;text-align:right;">${escapeHtml(input.booking.routeLabel)}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b;">Date</td><td style="padding:8px 0;text-align:right;">${escapeHtml(input.booking.travelDate)}</td></tr>
-            <tr><td style="padding:8px 0;color:#64748b;">Departure</td><td style="padding:8px 0;text-align:right;">${escapeHtml(input.booking.departureTime)}</td></tr>
+            <tr><td style="padding:8px 0;color:#64748b;">Departure</td><td style="padding:8px 0;text-align:right;">${escapeHtml(formatTime12h(input.booking.departureTime))}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b;">Seat(s)</td><td style="padding:8px 0;text-align:right;">${escapeHtml(seats.join(", "))}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b;">Amount due</td><td style="padding:8px 0;text-align:right;font-weight:700;">${formatNaira(total)}</td></tr>
           </table>

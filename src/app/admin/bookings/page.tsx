@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Booking, BookingStatus } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
-import { formatNaira, getBookingTotal } from "@/lib/utils";
+import { formatNaira, formatTime12h, getBookingTotal } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth-store";
 import { Select } from "@/components/ui/Select";
@@ -82,7 +82,7 @@ export default function AdminBookingsPage() {
   };
 
   const ticketMessage = selectedBooking
-    ? `Ecobus ticket ${selectedBooking.reference}: ${selectedBooking.trip.routeLabel}, ${selectedBooking.travelDate} ${selectedBooking.trip.departureTime}, seat(s) ${selectedBooking.seats.join(", ")}. ${typeof window === "undefined" ? "" : `${window.location.origin}/confirmation/${selectedBooking.id}`}`
+    ? `Ecobus ticket ${selectedBooking.reference}: ${selectedBooking.trip.routeLabel}, ${selectedBooking.travelDate} ${formatTime12h(selectedBooking.trip.departureTime)}, seat(s) ${selectedBooking.seats.join(", ")}. ${typeof window === "undefined" ? "" : `${window.location.origin}/confirmation/${selectedBooking.id}`}`
     : "";
 
   return (

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { useAuthStore } from "@/store/auth-store";
 import { useSearchParams } from "next/navigation";
 import { BarcodeDetectorConstructor, parseTicketQr } from "@/lib/ticket-qr";
+import { formatTime12h } from "@/lib/utils";
 
 type ValidationResult = {
   valid: boolean;
@@ -295,7 +296,7 @@ function AdminValidateTicketContent() {
             <Info label="Phone" value={result.passenger.phone} />
             <Info label="Route" value={result.routeLabel} />
             <Info label="Date" value={result.travelDate} />
-            <Info label="Departure" value={result.departureTime} />
+            <Info label="Departure" value={formatTime12h(result.departureTime)} />
             <Info label="Seats" value={result.seats.join(", ")} />
             <Info
               label="Boarding"
