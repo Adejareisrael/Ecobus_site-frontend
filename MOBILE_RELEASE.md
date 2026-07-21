@@ -33,7 +33,7 @@ npm run mobile:ios
 
 ## Before Submission
 
-- Confirm production payment, email, SMS, and WhatsApp APIs are configured.
+- Confirm production email, SMS, and WhatsApp APIs are configured (no online payment gateway is used — fares are paid in cash at the terminal).
 - Confirm production database backups and monitoring are active.
 - Confirm all test bookings and demo data are removed from production.
 - Run `npm run lint`, `npm run build`, `npm run test:coverage`, and `npm run mobile:sync`.

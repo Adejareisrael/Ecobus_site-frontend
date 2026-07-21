@@ -48,7 +48,7 @@ export const defaultSiteSettings: SiteSettings = {
     "/route-auchi-ramat.jpg",
   ],
   footerDescription: "Scheduled intercity travel made simple across Nigeria.",
-  supportText: "Need help with bookings or payments?",
+  supportText: "Need help with your booking?",
   whatsappNumber: "2349133994004",
   whatsappMessage: "Hi Ecobus Support, I need help with my booking.",
   email: "info@ecobustransport.com",
