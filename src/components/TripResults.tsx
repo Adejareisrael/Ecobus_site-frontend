@@ -98,9 +98,9 @@ export function TripResults({ trips, searchParams = {} }: Props) {
           onChange={(e) => setTimeSort(e.target.value as TimeFilter)}
         >
           <option value="all">Filter by departure time</option>
-          <option value="morning">Morning (00–12)</option>
-          <option value="afternoon">Afternoon (12–18)</option>
-          <option value="evening">Evening (18+)</option>
+          <option value="morning">Morning (12 AM–12 PM)</option>
+          <option value="afternoon">Afternoon (12 PM–6 PM)</option>
+          <option value="evening">Evening (6 PM+)</option>
         </Select>
 
       </Card>
