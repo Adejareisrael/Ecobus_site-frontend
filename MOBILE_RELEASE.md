@@ -23,6 +23,38 @@ npm run mobile:android
 npm run mobile:ios
 ```
 
+## Android release signing
+
+The release upload keystore is **not** in this repo (see `android/.gitignore`
+— `*.jks`, `*.keystore`, and `keystore.properties` are all excluded on
+purpose). It lives at `~/ecobus-android-signing/ecobus-upload-key.jks` on the
+machine it was generated on, with its passwords in `android/keystore.properties`
+(local-only, gitignored).
+
+**Back up both files somewhere durable (password manager + offline copy) right
+away.** If this keystore is ever lost, there is no recovery — you cannot
+publish an update to the existing `com.ecobustransport.app` Play Store listing
+ever again; Google would require a brand new app listing instead.
+
+To build a signed release bundle for Play Store submission:
+
+```bash
+npm run mobile:sync        # requires Node >=22, e.g. `nvm use 24` first
+cd android
+JAVA_HOME=/usr/local/opt/openjdk@21 ANDROID_HOME=/usr/local/share/android-commandlinetools \
+  ./gradlew bundleRelease
+```
+
+Output: `android/app/build/outputs/bundle/release/app-release.aab` — this is
+the file to upload to Play Console. If `keystore.properties` is missing, the
+release build type falls back to being unsigned (won't be accepted by Play
+Console, but debug builds/CI still work without it).
+
+Before increasing `versionCode`/`versionName` in `android/app/build.gradle`
+for a new release, confirm you're signing with the same keystore as the
+previous upload — Play Console rejects a bundle signed with a different key
+once the app has been published once.
+
 ## Store Accounts Needed
 
 - Google Play Console account for Android publishing.

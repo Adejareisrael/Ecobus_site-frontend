@@ -53,3 +53,9 @@ android/app/release/
 android/**/build/
 ios/**/DerivedData/
 ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# Android signing (never commit — losing these means you can never update
+# the app under the same Play Store listing again)
+*.jks
+*.keystore
+keystore.properties
