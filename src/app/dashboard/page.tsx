@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
   const login = useAuthStore((s) => s.login);
+  const logout = useAuthStore((s) => s.logout);
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +36,9 @@ export default function DashboardPage() {
     reason: "",
   });
   const [changeMessage, setChangeMessage] = useState("");
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     if (!user) {
@@ -138,6 +142,33 @@ export default function DashboardPage() {
     } else {
       const data = (await res.json()) as { error?: string };
       setChangeMessage(data.error ?? "Could not submit request.");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!token) return;
+
+    setDeleting(true);
+    setDeleteError("");
+
+    try {
+      const res = await fetch("/api/users/me", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setDeleteError(data.error ?? "Could not delete account.");
+        return;
+      }
+
+      logout();
+      router.push("/");
+    } catch {
+      setDeleteError("Something went wrong. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -254,6 +285,53 @@ export default function DashboardPage() {
         )}
         {profileError && (
           <p className="mt-3 text-sm text-red-600">{profileError}</p>
+        )}
+      </Card>
+
+      <Card className="p-5 sm:p-6 border-red-200">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-slate-900">Danger zone</h2>
+          <p className="text-sm text-slate-500">
+            Permanently delete your Ecobus account and personal data. Your
+            bookings are kept for records but will no longer be linked to
+            you. This cannot be undone.
+          </p>
+        </div>
+
+        {!confirmingDelete ? (
+          <Button
+            variant="secondary"
+            className="border border-red-200 text-red-600 hover:bg-red-50"
+            onClick={() => setConfirmingDelete(true)}
+          >
+            Delete my account
+          </Button>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-red-600">
+              Are you sure? This will permanently delete your account.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                className="bg-red-600 text-white hover:bg-red-700"
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Yes, delete my account"}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setConfirmingDelete(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {deleteError && (
+          <p className="mt-3 text-sm text-red-600">{deleteError}</p>
         )}
       </Card>
 

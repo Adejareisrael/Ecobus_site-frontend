@@ -112,6 +112,11 @@ export function Footer() {
                   Refund policy
                 </a>
               </li>
+              <li>
+                <a href="/delete-account" className="hover:text-ecobus-red dark:hover:text-sky-300">
+                  Delete account
+                </a>
+              </li>
             </ul>
           </div>
 

@@ -5,9 +5,12 @@ import { POST as login } from "@/app/api/auth/login/route";
 import { POST as register } from "@/app/api/auth/register/route";
 import { POST as forgotPassword } from "@/app/api/auth/forgot-password/route";
 import { POST as resetPassword } from "@/app/api/auth/reset-password/route";
+import { POST as requestAccountDeletion } from "@/app/api/auth/delete-account/route";
+import { POST as confirmAccountDeletion } from "@/app/api/auth/delete-account/confirm/route";
 import { hashResetToken } from "@/lib/password-reset";
+import { hashDeletionToken } from "@/lib/account-deletion";
 import { NextRequest } from "next/server";
-import { createUser, jsonRequest } from "../test-utils";
+import { createBooking, createUser, jsonRequest } from "../test-utils";
 
 function r(path: string, body: unknown): NextRequest {
   return jsonRequest(path, "POST", body) as unknown as NextRequest;
@@ -264,5 +267,108 @@ describe("POST /api/auth/reset-password", () => {
     );
 
     expect(res.status).toBe(400);
+  });
+});
+
+// ─── Account deletion (public flow) ───────────────────────────────────────────
+
+describe("POST /api/auth/delete-account", () => {
+  it("creates a deletion token for existing accounts without exposing account existence", async () => {
+    const { user } = await createUser({ email: "delete-me@test.com" });
+
+    const res = await requestAccountDeletion(
+      r("/api/auth/delete-account", { email: "delete-me@test.com" })
+    );
+    const data = await res.json();
+    const tokens = await prisma.accountDeletionToken.findMany({
+      where: { userId: user.id },
+    });
+
+    expect(res.status).toBe(200);
+    expect(data.message).toMatch(/If an Ecobus account exists/i);
+    expect(data.confirmUrl).toContain("/delete-account/confirm?token=");
+    expect(tokens).toHaveLength(1);
+  });
+
+  it("does not create a token for unknown accounts", async () => {
+    const res = await requestAccountDeletion(
+      r("/api/auth/delete-account", { email: "no-such-account@test.com" })
+    );
+    const tokens = await prisma.accountDeletionToken.findMany();
+
+    expect(res.status).toBe(200);
+    expect(tokens).toHaveLength(0);
+  });
+
+  it("rejects invalid email formats", async () => {
+    const res = await requestAccountDeletion(
+      r("/api/auth/delete-account", { email: "not-an-email" })
+    );
+
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("POST /api/auth/delete-account/confirm", () => {
+  it("deletes the account and detaches its bookings", async () => {
+    const { user } = await createUser({ email: "confirm-delete@test.com" });
+    const booking = await createBooking(user.id);
+
+    const requestRes = await requestAccountDeletion(
+      r("/api/auth/delete-account", { email: "confirm-delete@test.com" })
+    );
+    const requestData = await requestRes.json();
+    const token = new URL(requestData.confirmUrl).searchParams.get("token");
+
+    const res = await confirmAccountDeletion(
+      r("/api/auth/delete-account/confirm", { token })
+    );
+
+    expect(res.status).toBe(200);
+
+    const deletedUser = await prisma.user.findUnique({ where: { id: user.id } });
+    expect(deletedUser).toBeNull();
+
+    const detachedBooking = await prisma.booking.findUnique({ where: { id: booking.id } });
+    expect(detachedBooking?.userId).toBeNull();
+  });
+
+  it("rejects expired deletion tokens", async () => {
+    const { user } = await createUser({ email: "expired-delete@test.com" });
+    await prisma.accountDeletionToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashDeletionToken("expired-deletion-token"),
+        expiresAt: new Date(Date.now() - 1000),
+      },
+    });
+
+    const res = await confirmAccountDeletion(
+      r("/api/auth/delete-account/confirm", { token: "expired-deletion-token" })
+    );
+
+    expect(res.status).toBe(400);
+
+    const stillExists = await prisma.user.findUnique({ where: { id: user.id } });
+    expect(stillExists).not.toBeNull();
+  });
+
+  it("rejects a deletion token that has already been used", async () => {
+    await createUser({ email: "reuse-delete@test.com" });
+    const requestRes = await requestAccountDeletion(
+      r("/api/auth/delete-account", { email: "reuse-delete@test.com" })
+    );
+    const requestData = await requestRes.json();
+    const token = new URL(requestData.confirmUrl).searchParams.get("token");
+
+    const first = await confirmAccountDeletion(
+      r("/api/auth/delete-account/confirm", { token })
+    );
+    expect(first.status).toBe(200);
+
+    const second = await confirmAccountDeletion(
+      r("/api/auth/delete-account/confirm", { token })
+    );
+    expect(second.status).toBe(400);
   });
 });

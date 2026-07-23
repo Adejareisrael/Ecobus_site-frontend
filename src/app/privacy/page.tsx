@@ -79,10 +79,12 @@ export default function PrivacyPage() {
         <h2 className="text-xl font-semibold">Sharing and retention</h2>
         <p className="text-slate-600">
           We share information only with service providers needed to operate
-          the booking service: Resend (booking and ticket emails) and our
-          database and file storage provider, Supabase. Booking records are
-          retained for operational, customer support, audit, fraud-prevention,
-          and legal purposes.
+          the booking service: Resend (booking and ticket emails), our
+          database and file storage provider, Supabase, and, if you choose to
+          sign in with Google, Firebase Authentication (operated by Google),
+          which receives your name and email address to verify your identity.
+          Booking records are retained for operational, customer support,
+          audit, fraud-prevention, and legal purposes.
         </p>
       </section>
       <section className="space-y-2">
@@ -91,6 +93,20 @@ export default function PrivacyPage() {
           Customers may request correction of account information, booking
           support, or review of stored contact details by contacting Ecobus
           support.
+        </p>
+        <p className="text-slate-600">
+          You can permanently delete your account and personal data at any
+          time from the &quot;Danger zone&quot; section of your{" "}
+          <a href="/dashboard" className="underline text-ecobus-purple">
+            dashboard
+          </a>
+          , or without logging in at{" "}
+          <a href="/delete-account" className="underline text-ecobus-purple">
+            ecobustransport.com/delete-account
+          </a>
+          . Booking records are kept for the retention purposes described
+          above but are no longer linked to your personal account once
+          deleted.
         </p>
       </section>
       <section className="space-y-2">

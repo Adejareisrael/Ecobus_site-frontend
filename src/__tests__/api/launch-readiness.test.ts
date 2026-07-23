@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { GET as getMe, PATCH as patchMe } from "@/app/api/users/me/route";
+import { GET as getMe, PATCH as patchMe, DELETE as deleteMe } from "@/app/api/users/me/route";
 import { POST as createTerminal } from "@/app/api/terminals/route";
 import {
   DELETE as deleteTerminal,
@@ -10,6 +10,7 @@ import {
 import { GET as getSeats } from "@/app/api/trips/[tripId]/seats/route";
 import {
   createAdmin,
+  createBooking,
   createUser,
   getRequest,
   jsonRequest,
@@ -80,6 +81,28 @@ describe("customer profile API", () => {
     );
 
     expect(res.status).toBe(409);
+  });
+
+  it("requires auth to delete an account", async () => {
+    const res = await deleteMe(asNext(getRequest("/api/users/me")));
+    expect(res.status).toBe(401);
+  });
+
+  it("deletes the authenticated account and detaches its bookings", async () => {
+    const { user, token } = await createUser({ email: "self-delete@test.com" });
+    const booking = await createBooking(user.id);
+
+    const res = await deleteMe(asNext(getRequest("/api/users/me", token)));
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.ok).toBe(true);
+
+    const deletedUser = await prisma.user.findUnique({ where: { id: user.id } });
+    expect(deletedUser).toBeNull();
+
+    const detachedBooking = await prisma.booking.findUnique({ where: { id: booking.id } });
+    expect(detachedBooking?.userId).toBeNull();
   });
 });
 

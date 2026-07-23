@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthResponse, requireAuth } from "@/lib/api-auth";
 import { signToken } from "@/lib/auth";
+import { deleteUserAccount } from "@/lib/account-deletion";
 
 function formatUser(user: {
   id: string;
@@ -82,6 +83,22 @@ export async function PATCH(req: NextRequest) {
     });
 
     return NextResponse.json({ user: formatUser(user), token });
+  } catch {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const auth = requireAuth(req);
+    if (isAuthResponse(auth)) return auth;
+
+    await deleteUserAccount(auth.userId);
+
+    return NextResponse.json({
+      ok: true,
+      message: "Your account and personal data have been deleted.",
+    });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

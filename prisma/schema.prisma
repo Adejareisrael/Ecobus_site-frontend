@@ -7,18 +7,29 @@ datasource db {
 }
 
 model User {
-  id                  String               @id @default(cuid())
-  name                String
-  email               String               @unique
-  phone               String?
-  password            String
-  role                String               @default("customer")
-  bookings            Booking[]
-  passwordResetTokens PasswordResetToken[]
-  createdAt           DateTime             @default(now())
+  id                    String                 @id @default(cuid())
+  name                  String
+  email                 String                 @unique
+  phone                 String?
+  password              String
+  role                  String                 @default("customer")
+  bookings              Booking[]
+  passwordResetTokens   PasswordResetToken[]
+  accountDeletionTokens AccountDeletionToken[]
+  createdAt             DateTime               @default(now())
 }
 
 model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model AccountDeletionToken {
   id        String    @id @default(cuid())
   tokenHash String    @unique
   userId    String
