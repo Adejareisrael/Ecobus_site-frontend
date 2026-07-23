@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { POST as login } from "@/app/api/auth/login/route";
@@ -189,6 +189,46 @@ describe("POST /api/auth/forgot-password", () => {
     expect(data.resetUrl).toContain("/reset-password?token=");
     expect(tokens).toHaveLength(1);
     expect(tokens[0].tokenHash).not.toContain(data.resetUrl.split("token=")[1]);
+  });
+
+  it("sends the reset link through Resend when email env vars are configured", async () => {
+    const originalApiKey = process.env.RESEND_API_KEY;
+    const originalEmailFrom = process.env.EMAIL_FROM;
+    process.env.RESEND_API_KEY = "re_test_key";
+    process.env.EMAIL_FROM = "Ecobus <tickets@mail.ecobustransport.com>";
+
+    let capturedInit: RequestInit | undefined;
+    const fetchMock = vi.fn((_url: string, init?: RequestInit) => {
+      capturedInit = init;
+      return Promise.resolve(new Response(JSON.stringify({ id: "email_123" }), { status: 200 }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    try {
+      await createUser({ email: "reset-emailed@test.com" });
+
+      const res = await forgotPassword(
+        r("/api/auth/forgot-password", { email: "reset-emailed@test.com" })
+      );
+      expect(res.status).toBe(200);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://api.resend.com/emails",
+        expect.objectContaining({
+          method: "POST",
+          headers: expect.objectContaining({ Authorization: "Bearer re_test_key" }),
+        })
+      );
+      const body = JSON.parse(capturedInit?.body as string);
+      expect(body.to).toBe("reset-emailed@test.com");
+      expect(body.text).toContain("/reset-password?token=");
+    } finally {
+      vi.unstubAllGlobals();
+      if (originalApiKey === undefined) delete process.env.RESEND_API_KEY;
+      else process.env.RESEND_API_KEY = originalApiKey;
+      if (originalEmailFrom === undefined) delete process.env.EMAIL_FROM;
+      else process.env.EMAIL_FROM = originalEmailFrom;
+    }
   });
 
   it("does not create a token for unknown accounts", async () => {

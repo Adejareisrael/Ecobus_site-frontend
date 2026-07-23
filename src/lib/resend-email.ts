@@ -134,6 +134,72 @@ export async function sendAccountDeletionEmail(input: SendAccountDeletionEmailIn
   };
 }
 
+type SendPasswordResetEmailInput = {
+  recipient: string;
+  resetUrl: string;
+};
+
+function buildPasswordResetEmailHtml(input: SendPasswordResetEmailInput) {
+  return `
+    <div style="font-family:Arial,sans-serif;background:#f8fafc;padding:24px;color:#0f172a;">
+      <div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+        <div style="background:#0f4f8a;color:#ffffff;padding:24px;">
+          <p style="margin:0;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;">Ecobus account</p>
+          <h1 style="margin:8px 0 0;font-size:26px;">Reset your password</h1>
+        </div>
+        <div style="padding:24px;">
+          <p style="margin:0 0 16px;">We received a request to reset your Ecobus password. This link expires in 1 hour.</p>
+          <a href="${escapeHtml(input.resetUrl)}" style="display:inline-block;background:#0f4f8a;color:#ffffff;text-decoration:none;border-radius:12px;padding:12px 18px;font-weight:700;">Reset password</a>
+          <p style="margin:18px 0 0;color:#64748b;font-size:13px;">If you didn't request this, you can safely ignore this email — your password will not be changed.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+export async function sendPasswordResetEmail(input: SendPasswordResetEmailInput) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+
+  if (!apiKey || !from) {
+    return {
+      sent: false,
+      skipped: true,
+      error: "Resend is not configured. Add RESEND_API_KEY and EMAIL_FROM.",
+    };
+  }
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: input.recipient,
+      subject: "Reset your Ecobus password",
+      text: `Reset your Ecobus password by opening this link (expires in 1 hour): ${input.resetUrl}\n\nIf you didn't request this, you can ignore this email.`,
+      html: buildPasswordResetEmailHtml(input),
+    }),
+  });
+
+  const data = (await res.json().catch(() => ({}))) as ResendResponse;
+  if (!res.ok) {
+    return {
+      sent: false,
+      skipped: false,
+      error: data.message || data.name || "Resend email failed.",
+    };
+  }
+
+  return {
+    sent: true,
+    skipped: false,
+    providerId: data.id,
+  };
+}
+
 export async function sendTicketEmail(input: SendTicketEmailInput) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;

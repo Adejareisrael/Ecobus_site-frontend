@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createResetToken, getResetUrl } from "@/lib/password-reset";
+import { sendPasswordResetEmail } from "@/lib/resend-email";
 import { checkRateLimit, getClientKey } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -44,6 +45,8 @@ export async function POST(req: NextRequest) {
         },
       });
       resetUrl = getResetUrl(new URL(req.url).origin, resetToken.token);
+
+      await sendPasswordResetEmail({ recipient: normalizedEmail, resetUrl });
     }
 
     return NextResponse.json({
