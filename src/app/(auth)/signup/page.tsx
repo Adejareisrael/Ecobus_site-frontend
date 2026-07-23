@@ -18,18 +18,24 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ fullName: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", password: "" });
 
   const handleSignup = async () => {
-    if (!form.fullName || !form.email || !form.password) return;
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.email || !form.password) return;
     setLoading(true);
     setError("");
 
     try {
+      const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          fullName,
+          email: form.email,
+          phone: form.phone,
+          password: form.password,
+        }),
       });
 
       const data = await res.json();
@@ -65,11 +71,20 @@ export default function SignupPage() {
       )}
 
       <div className="space-y-4">
-        <Input
-          placeholder="Full name"
-          value={form.fullName}
-          onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-        />
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            placeholder="First name"
+            autoComplete="given-name"
+            value={form.firstName}
+            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+          />
+          <Input
+            placeholder="Last name"
+            autoComplete="family-name"
+            value={form.lastName}
+            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+          />
+        </div>
         <Input
           placeholder="Email address"
           type="email"
@@ -105,7 +120,7 @@ export default function SignupPage() {
       <Button
         className="w-full bg-ecobus-red text-white"
         onClick={handleSignup}
-        disabled={!form.fullName || !form.email || !form.password || loading}
+        disabled={!form.firstName.trim() || !form.lastName.trim() || !form.email || !form.password || loading}
       >
         {loading ? "Creating account..." : "Create account"}
       </Button>
