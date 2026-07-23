@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/auth";
 import { validatePassword } from "@/lib/password-reset";
+import { checkRateLimit, getClientKey } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,6 +21,17 @@ export async function POST(req: NextRequest) {
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+    }
+
+    const rate = checkRateLimit(
+      getClientKey("register", req, normalizedEmail),
+      { limit: 8, windowMs: 15 * 60 * 1000 }
+    );
+    if (rate.limited) {
+      return NextResponse.json(
+        { error: "Too many signup attempts. Please try again later." },
+        { status: 429 }
+      );
     }
 
     const passwordError = validatePassword(password);

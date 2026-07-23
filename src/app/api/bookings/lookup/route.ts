@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTokenFromRequest } from "@/lib/auth";
+import { checkRateLimit, getClientKey } from "@/lib/rate-limit";
 
 function formatBooking(booking: {
   id: string;
@@ -48,6 +49,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       { error: "Email or phone is required" },
       { status: 400 }
+    );
+  }
+
+  const rate = checkRateLimit(getClientKey("bookings-lookup", req, contact), {
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (rate.limited) {
+    return NextResponse.json(
+      { error: "Too many lookup attempts. Please try again later." },
+      { status: 429 }
     );
   }
 
