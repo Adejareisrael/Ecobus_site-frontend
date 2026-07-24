@@ -103,8 +103,14 @@ export default function HirePage() {
               <Input placeholder="Vehicle type" value={form.vehicleType} onChange={(e) => updateForm({ vehicleType: e.target.value })} />
               <Input placeholder="Pickup location" value={form.pickup} onChange={(e) => updateForm({ pickup: e.target.value })} required />
               <Input placeholder="Destination" value={form.destination} onChange={(e) => updateForm({ destination: e.target.value })} required />
-              <Input type="date" min={minDate} value={form.travelDate} onChange={(e) => updateForm({ travelDate: e.target.value })} required />
-              <Input type="date" min={form.travelDate || minDate} value={form.returnDate} onChange={(e) => updateForm({ returnDate: e.target.value })} />
+              <label className="grid gap-1 text-xs font-medium text-slate-500">
+                Travel date
+                <Input type="date" min={minDate} value={form.travelDate} onChange={(e) => updateForm({ travelDate: e.target.value })} required />
+              </label>
+              <label className="grid gap-1 text-xs font-medium text-slate-500">
+                Return date
+                <Input type="date" min={form.travelDate || minDate} value={form.returnDate} onChange={(e) => updateForm({ returnDate: e.target.value })} />
+              </label>
               <label className="grid gap-1 text-xs font-medium text-slate-500">
                 Number of buses
                 <Input type="number" min="1" value={form.passengers} onChange={(e) => updateForm({ passengers: positiveIntegerInput(e.target.value) })} required />
