@@ -108,7 +108,6 @@ export type CharterRequest = {
   travelDate: string;
   returnDate?: string | null;
   passengers: number;
-  numberOfBuses: number;
   vehicleType?: string | null;
   notes?: string | null;
   status: "New" | "Contacted" | "Quoted" | "Closed";

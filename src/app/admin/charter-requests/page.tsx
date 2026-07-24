@@ -93,7 +93,6 @@ export default function AdminCharterRequestsPage() {
                 <Info label="Travel date" value={request.travelDate} />
                 <Info label="Return date" value={request.returnDate || "One way"} />
                 <Info label="Passengers" value={String(request.passengers)} />
-                <Info label="Number of buses" value={String(request.numberOfBuses)} />
                 <Info label="Vehicle" value={request.vehicleType || "Not specified"} />
               </div>
 
