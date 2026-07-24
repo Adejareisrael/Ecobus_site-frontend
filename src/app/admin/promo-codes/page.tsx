@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { DateDropdown } from "@/components/ui/DateDropdown";
 import { PromoCode } from "@/lib/types";
 import { formatNaira } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
@@ -289,17 +288,19 @@ export default function AdminPromoCodesPage() {
 
               <label className="grid gap-1 text-xs font-medium text-slate-500">
                 Starts
-                <DateDropdown
+                <Input
+                  type="date"
                   value={form.startsAt}
-                  onChange={(value) => updateForm({ startsAt: value })}
+                  onChange={(event) => updateForm({ startsAt: event.target.value })}
                 />
               </label>
 
               <label className="grid gap-1 text-xs font-medium text-slate-500">
                 Expires
-                <DateDropdown
+                <Input
+                  type="date"
                   value={form.expiresAt}
-                  onChange={(value) => updateForm({ expiresAt: value })}
+                  onChange={(event) => updateForm({ expiresAt: event.target.value })}
                 />
               </label>
 
