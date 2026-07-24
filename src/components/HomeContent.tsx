@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SearchForm } from "@/components/SearchForm";
 import { Card } from "@/components/ui/Card";
 import { Terminal } from "@/lib/types";
@@ -150,6 +151,9 @@ function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProp
     resetTimer();
   };
 
+  const goPrev = () => goTo((current - 1 + total) % total);
+  const goNext = () => goTo((current + 1) % total);
+
   const visibleRoutes = Array.from({ length: visibleCount }, (_, i) => {
     const idx = (current + i) % total;
     return { idx, route: routes[idx], image: routeImages[idx] || fallbackImages[idx] || "/route-lagos-benin.jpg" };
@@ -166,6 +170,28 @@ function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProp
         </div>
 
         <div className="relative overflow-hidden">
+          {total > 1 && (
+            <button
+              type="button"
+              onClick={goPrev}
+              aria-label="Previous route"
+              className="absolute left-0 top-1/2 z-10 -translate-y-1/2 -translate-x-2 rounded-full border border-slate-200 bg-white/90 p-2 text-slate-700 shadow-md transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-100 dark:hover:bg-slate-900"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          )}
+
+          {total > 1 && (
+            <button
+              type="button"
+              onClick={goNext}
+              aria-label="Next route"
+              className="absolute right-0 top-1/2 z-10 -translate-y-1/2 translate-x-2 rounded-full border border-slate-200 bg-white/90 p-2 text-slate-700 shadow-md transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-100 dark:hover:bg-slate-900"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence mode="popLayout">
               {visibleRoutes.map(({ idx, route, image }, position) => (

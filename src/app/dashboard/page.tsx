@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth-store";
 import { Input } from "@/components/ui/Input";
+import { DateDropdown } from "@/components/ui/DateDropdown";
 import { phoneInput } from "@/lib/form-input";
 
 export default function DashboardPage() {
@@ -438,13 +439,12 @@ export default function DashboardPage() {
                         <option value="Cancel">Cancel</option>
                       </select>
                       {changeRequest.requestType === "Reschedule" ? (
-                        <Input
-                          type="date"
+                        <DateDropdown
                           value={changeRequest.preferredDate}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setChangeRequest((current) => ({
                               ...current,
-                              preferredDate: event.target.value,
+                              preferredDate: value,
                             }))
                           }
                         />

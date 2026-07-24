@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeftRight, Search } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Select } from "./ui/Select";
-import { Input } from "./ui/Input";
+import { DateDropdown } from "./ui/DateDropdown";
 import { Terminal } from "@/lib/types";
 
 type Props = {
@@ -73,11 +73,9 @@ export function SearchForm({
       className="
         grid w-full min-w-0 gap-4 rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-100
         dark:border dark:border-sky-900/50 dark:bg-[#0d1a2e]/95 dark:shadow-[0_24px_70px_rgb(0_0_0_/_0.32)] dark:ring-sky-800/40
-        grid-cols-1
-        md:grid-cols-[1.2fr_auto_1.2fr_1fr_auto]
       "
     >
-      <div className="flex rounded-xl bg-slate-100 p-1 text-sm font-medium md:col-span-full md:w-fit">
+      <div className="flex rounded-xl bg-slate-100 p-1 text-sm font-medium md:w-fit">
         {[
           ["one-way", "One way"],
           ["round-trip", "Round trip"],
@@ -103,71 +101,77 @@ export function SearchForm({
         ))}
       </div>
 
-      <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
-        From
-        <Select name="from" value={from} onChange={(e) => setFrom(e.target.value)}>
-          <option value="">Select terminal</option>
-          {terminals.map((terminal) => (
-            <option key={terminal.id} value={terminal.id}>
-              {terminal.city} - {terminal.name}
-            </option>
-          ))}
-        </Select>
-      </label>
+      <div className="grid min-w-0 gap-4 md:grid-cols-[1fr_auto_1fr]">
+        <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
+          From
+          <Select name="from" value={from} onChange={(e) => setFrom(e.target.value)}>
+            <option value="">Select terminal</option>
+            {terminals.map((terminal) => (
+              <option key={terminal.id} value={terminal.id}>
+                {terminal.city} - {terminal.name}
+              </option>
+            ))}
+          </Select>
+        </label>
 
-      <div className="flex items-end justify-start md:justify-center">
-        <button
-          type="button"
-          onClick={swapTerminals}
-          disabled={!from && !to}
-          aria-label="Swap route"
-          title="Swap route"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-ecobus-red hover:text-ecobus-red disabled:cursor-not-allowed disabled:opacity-40 dark:border-sky-900/60 dark:bg-slate-950/25 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-300"
-        >
-          <ArrowLeftRight className="h-4 w-4" />
-        </button>
+        <div className="flex items-end justify-start md:justify-center">
+          <button
+            type="button"
+            onClick={swapTerminals}
+            disabled={!from && !to}
+            aria-label="Swap route"
+            title="Swap route"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-ecobus-red hover:text-ecobus-red disabled:cursor-not-allowed disabled:opacity-40 dark:border-sky-900/60 dark:bg-slate-950/25 dark:text-slate-300 dark:hover:border-sky-400 dark:hover:text-sky-300"
+          >
+            <ArrowLeftRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
+          To
+          <Select name="to" value={to} onChange={(e) => setTo(e.target.value)}>
+            <option value="">Select terminal</option>
+            {destinations.map((terminal) => (
+              <option key={terminal.id} value={terminal.id}>
+                {terminal.city} - {terminal.name}
+              </option>
+            ))}
+          </Select>
+        </label>
       </div>
 
-      <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
-        To
-        <Select name="to" value={to} onChange={(e) => setTo(e.target.value)}>
-          <option value="">Select terminal</option>
-          {destinations.map((terminal) => (
-            <option key={terminal.id} value={terminal.id}>
-              {terminal.city} - {terminal.name}
-            </option>
-          ))}
-        </Select>
-      </label>
-
-      <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
-        Date
-        <Input
-          type="date"
-          name="date"
-          min={minDate}
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-      </label>
-
-      {tripType === "round-trip" && (
-        <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500 md:col-start-4">
-          Return date
-          <Input
-            type="date"
-            name="returnDate"
-            min={date || minDate}
-            value={returnDate}
-            onChange={(e) => setReturnDate(e.target.value)}
+      <div
+        className={`grid min-w-0 gap-4 ${
+          tripType === "round-trip" ? "md:grid-cols-[1fr_1fr_auto]" : "md:grid-cols-[1fr_auto]"
+        }`}
+      >
+        <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
+          Date
+          <DateDropdown
+            name="date"
+            min={minDate}
+            value={date}
+            onChange={setDate}
           />
         </label>
-      )}
 
-      <Button className="h-12 w-full self-end gap-2 dark:bg-sky-500 dark:hover:bg-sky-400" type="submit">
-        <Search className="h-4 w-4" />
-        Search
-      </Button>
+        {tripType === "round-trip" && (
+          <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
+            Return date
+            <DateDropdown
+              name="returnDate"
+              min={date || minDate}
+              value={returnDate}
+              onChange={setReturnDate}
+            />
+          </label>
+        )}
+
+        <Button className="h-12 w-full self-end gap-2 dark:bg-sky-500 dark:hover:bg-sky-400" type="submit">
+          <Search className="h-4 w-4" />
+          Search
+        </Button>
+      </div>
     </form>
   );
 }

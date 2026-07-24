@@ -5,6 +5,7 @@ import { BusFront, CalendarDays, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { DateDropdown } from "@/components/ui/DateDropdown";
 import { phoneInput, positiveIntegerInput } from "@/lib/form-input";
 
 const emptyForm = {
@@ -103,9 +104,9 @@ export default function HirePage() {
               <Input placeholder="Vehicle type" value={form.vehicleType} onChange={(e) => updateForm({ vehicleType: e.target.value })} />
               <Input placeholder="Pickup location" value={form.pickup} onChange={(e) => updateForm({ pickup: e.target.value })} required />
               <Input placeholder="Destination" value={form.destination} onChange={(e) => updateForm({ destination: e.target.value })} required />
-              <Input type="date" min={minDate} value={form.travelDate} onChange={(e) => updateForm({ travelDate: e.target.value })} required />
-              <Input type="date" min={form.travelDate || minDate} value={form.returnDate} onChange={(e) => updateForm({ returnDate: e.target.value })} />
-              <Input type="number" min="1" value={form.passengers} onChange={(e) => updateForm({ passengers: positiveIntegerInput(e.target.value) })} required />
+              <DateDropdown min={minDate} value={form.travelDate} onChange={(value) => updateForm({ travelDate: value })} required />
+              <DateDropdown min={form.travelDate || minDate} value={form.returnDate} onChange={(value) => updateForm({ returnDate: value })} />
+              <Input type="number" min="1" placeholder="Number of passengers" value={form.passengers} onChange={(e) => updateForm({ passengers: positiveIntegerInput(e.target.value) })} required />
             </div>
 
             <textarea
