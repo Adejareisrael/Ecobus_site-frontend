@@ -87,6 +87,7 @@ model CharterRequest {
   travelDate   String
   returnDate   String?
   passengers   Int
+  numberOfBuses Int     @default(1)
   vehicleType  String?
   notes        String?
   status       String   @default("New")

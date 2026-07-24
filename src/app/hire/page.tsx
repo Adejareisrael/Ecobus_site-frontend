@@ -15,6 +15,7 @@ const emptyForm = {
   destination: "",
   travelDate: "",
   returnDate: "",
+  numberOfBuses: "1",
   passengers: "1",
   vehicleType: "Toyota AC bus",
   notes: "",
@@ -105,7 +106,10 @@ export default function HirePage() {
               <Input placeholder="Destination" value={form.destination} onChange={(e) => updateForm({ destination: e.target.value })} required />
               <Input type="date" min={minDate} value={form.travelDate} onChange={(e) => updateForm({ travelDate: e.target.value })} required />
               <Input type="date" min={form.travelDate || minDate} value={form.returnDate} onChange={(e) => updateForm({ returnDate: e.target.value })} />
-              <Input type="number" min="1" placeholder="Number of passengers" value={form.passengers} onChange={(e) => updateForm({ passengers: positiveIntegerInput(e.target.value) })} required />
+              <div className="grid gap-4">
+                <Input type="number" min="1" placeholder="Number of buses" value={form.numberOfBuses} onChange={(e) => updateForm({ numberOfBuses: positiveIntegerInput(e.target.value) })} required />
+                <Input type="number" min="1" placeholder="Number of passengers" value={form.passengers} onChange={(e) => updateForm({ passengers: positiveIntegerInput(e.target.value) })} required />
+              </div>
             </div>
 
             <textarea

@@ -12,6 +12,7 @@ function formatRequest(request: {
   travelDate: string;
   returnDate: string | null;
   passengers: number;
+  numberOfBuses: number;
   vehicleType: string | null;
   notes: string | null;
   status: string;
@@ -47,11 +48,13 @@ export async function POST(req: NextRequest) {
       travelDate?: string;
       returnDate?: string;
       passengers?: number | string;
+      numberOfBuses?: number | string;
       vehicleType?: string;
       notes?: string;
     };
 
     const passengers = Number(input.passengers);
+    const numberOfBuses = input.numberOfBuses ? Number(input.numberOfBuses) : 1;
     if (
       !input.fullName?.trim() ||
       !input.phone?.trim() ||
@@ -59,7 +62,9 @@ export async function POST(req: NextRequest) {
       !input.destination?.trim() ||
       !input.travelDate?.trim() ||
       Number.isNaN(passengers) ||
-      passengers < 1
+      passengers < 1 ||
+      Number.isNaN(numberOfBuses) ||
+      numberOfBuses < 1
     ) {
       return NextResponse.json({ error: "Required details are missing" }, { status: 400 });
     }
@@ -74,6 +79,7 @@ export async function POST(req: NextRequest) {
         travelDate: input.travelDate,
         returnDate: input.returnDate?.trim() || null,
         passengers,
+        numberOfBuses,
         vehicleType: input.vehicleType?.trim() || null,
         notes: input.notes?.trim() || null,
       },
