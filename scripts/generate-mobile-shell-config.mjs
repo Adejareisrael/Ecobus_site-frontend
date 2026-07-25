@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const serverUrl =
-  process.env.CAPACITOR_SERVER_URL || "https://booking.ecobustransport.com";
+  process.env.CAPACITOR_SERVER_URL || "https://bookings.ecobustransport.com";
 
 const outPath = path.join(__dirname, "..", "mobile-shell", "config.js");
 fs.writeFileSync(

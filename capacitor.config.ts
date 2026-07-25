@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const serverUrl =
-  process.env.CAPACITOR_SERVER_URL || "https://booking.ecobustransport.com";
+  process.env.CAPACITOR_SERVER_URL || "https://bookings.ecobustransport.com";
 
 // The app launches into the bundled mobile-shell (webDir below), which
 // health-checks serverUrl with its own timeout/retry before redirecting —
