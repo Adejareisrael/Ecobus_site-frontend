@@ -15,6 +15,10 @@ type TripForm = {
   id: string;
   departureTerminalId: string;
   destinationTerminalId: string;
+  departureIsCustom: boolean;
+  departureCustomName: string;
+  destinationIsCustom: boolean;
+  destinationCustomName: string;
   departureTime: string;
   arrivalTime: string;
   price: string;
@@ -28,6 +32,10 @@ const emptyForm: TripForm = {
   id: "",
   departureTerminalId: "",
   destinationTerminalId: "",
+  departureIsCustom: false,
+  departureCustomName: "",
+  destinationIsCustom: false,
+  destinationCustomName: "",
   departureTime: "07:00",
   arrivalTime: "11:30",
   price: "",
@@ -36,6 +44,23 @@ const emptyForm: TripForm = {
   busLayoutId: "toyota-14",
   amenities: "AC, USB charging, Luggage space",
 };
+
+// Locations that aren't a registered Terminal are stored on the trip as a
+// self-describing id (no separate table), so trips can be created for
+// one-off pickup/drop-off points without first creating a Terminal record.
+const CUSTOM_LOCATION_PREFIX = "custom:";
+
+function isCustomLocationId(id: string) {
+  return id.startsWith(CUSTOM_LOCATION_PREFIX);
+}
+
+function encodeCustomLocation(name: string) {
+  return `${CUSTOM_LOCATION_PREFIX}${encodeURIComponent(name.trim())}`;
+}
+
+function decodeCustomLocation(id: string) {
+  return decodeURIComponent(id.slice(CUSTOM_LOCATION_PREFIX.length));
+}
 
 export default function AdminTripsPage() {
   const token = useAuthStore((s) => s.token);
@@ -110,6 +135,11 @@ export default function AdminTripsPage() {
     (terminal) => terminal.id !== form.departureTerminalId
   );
 
+  const locationName = (id: string) => {
+    if (isCustomLocationId(id)) return decodeCustomLocation(id);
+    return terminalNameById.get(id) ?? id;
+  };
+
   const updateForm = (updates: Partial<TripForm>) => {
     setForm((current) => ({ ...current, ...updates }));
   };
@@ -127,10 +157,21 @@ export default function AdminTripsPage() {
   };
 
   const openEditForm = (trip: Trip) => {
+    const departureIsCustom = isCustomLocationId(trip.departureTerminalId);
+    const destinationIsCustom = isCustomLocationId(trip.destinationTerminalId);
+
     setForm({
       id: trip.id,
-      departureTerminalId: trip.departureTerminalId,
-      destinationTerminalId: trip.destinationTerminalId,
+      departureTerminalId: departureIsCustom ? "" : trip.departureTerminalId,
+      destinationTerminalId: destinationIsCustom ? "" : trip.destinationTerminalId,
+      departureIsCustom,
+      departureCustomName: departureIsCustom
+        ? decodeCustomLocation(trip.departureTerminalId)
+        : "",
+      destinationIsCustom,
+      destinationCustomName: destinationIsCustom
+        ? decodeCustomLocation(trip.destinationTerminalId)
+        : "",
       departureTime: trip.departureTime,
       arrivalTime: trip.arrivalTime,
       price: String(trip.price),
@@ -158,9 +199,7 @@ export default function AdminTripsPage() {
   };
 
   const routeLabel = (fromId: string, toId: string) => {
-    const from = terminalNameById.get(fromId) ?? fromId;
-    const to = terminalNameById.get(toId) ?? toId;
-    return `${from} -> ${to}`;
+    return `${locationName(fromId)} -> ${locationName(toId)}`;
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -171,9 +210,17 @@ export default function AdminTripsPage() {
     const availableSeats =
       form.busType === "Toyota" ? 14 : Number(form.availableSeats);
 
+    const departureTerminalId = form.departureIsCustom
+      ? encodeCustomLocation(form.departureCustomName)
+      : form.departureTerminalId;
+    const destinationTerminalId = form.destinationIsCustom
+      ? encodeCustomLocation(form.destinationCustomName)
+      : form.destinationTerminalId;
+
     if (
-      !form.departureTerminalId ||
-      !form.destinationTerminalId ||
+      (form.departureIsCustom ? !form.departureCustomName.trim() : !form.departureTerminalId) ||
+      (form.destinationIsCustom ? !form.destinationCustomName.trim() : !form.destinationTerminalId) ||
+      departureTerminalId === destinationTerminalId ||
       !form.departureTime ||
       !form.arrivalTime ||
       Number.isNaN(price) ||
@@ -186,8 +233,8 @@ export default function AdminTripsPage() {
 
     const trip: Trip = {
       id: editingId ?? `trip-${Date.now()}`,
-      departureTerminalId: form.departureTerminalId,
-      destinationTerminalId: form.destinationTerminalId,
+      departureTerminalId,
+      destinationTerminalId,
       departureTime: form.departureTime,
       arrivalTime: form.arrivalTime,
       price,
@@ -198,7 +245,7 @@ export default function AdminTripsPage() {
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean),
-      routeLabel: routeLabel(form.departureTerminalId, form.destinationTerminalId),
+      routeLabel: routeLabel(departureTerminalId, destinationTerminalId),
     };
 
     const res = await fetch(editingId ? `/api/trips/${editingId}` : "/api/trips", {
@@ -265,47 +312,99 @@ export default function AdminTripsPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <label className="grid gap-1 text-xs font-medium text-slate-500">
-                From
-                <Select
-                  value={form.departureTerminalId}
-                  onChange={(event) =>
-                    updateForm({
-                      departureTerminalId: event.target.value,
-                      destinationTerminalId:
-                        event.target.value === form.destinationTerminalId
-                          ? ""
-                          : form.destinationTerminalId,
-                    })
-                  }
-                  required
-                >
-                  <option value="">Select terminal</option>
-                  {terminals.map((terminal) => (
-                    <option key={terminal.id} value={terminal.id}>
-                      {terminal.city} - {terminal.name}
-                    </option>
-                  ))}
-                </Select>
-              </label>
+              <div className="grid gap-1 text-xs font-medium text-slate-500">
+                <div className="flex items-center justify-between">
+                  <span>From</span>
+                  <button
+                    type="button"
+                    className="font-medium text-ecobus-red hover:underline"
+                    onClick={() =>
+                      updateForm({
+                        departureIsCustom: !form.departureIsCustom,
+                        departureTerminalId: "",
+                        departureCustomName: "",
+                      })
+                    }
+                  >
+                    {form.departureIsCustom ? "Choose terminal instead" : "Use custom location"}
+                  </button>
+                </div>
+                {form.departureIsCustom ? (
+                  <Input
+                    placeholder="e.g. Ijebu-Ode Park"
+                    value={form.departureCustomName}
+                    onChange={(event) =>
+                      updateForm({ departureCustomName: event.target.value })
+                    }
+                    required
+                  />
+                ) : (
+                  <Select
+                    value={form.departureTerminalId}
+                    onChange={(event) =>
+                      updateForm({
+                        departureTerminalId: event.target.value,
+                        destinationTerminalId:
+                          event.target.value === form.destinationTerminalId
+                            ? ""
+                            : form.destinationTerminalId,
+                      })
+                    }
+                    required
+                  >
+                    <option value="">Select terminal</option>
+                    {terminals.map((terminal) => (
+                      <option key={terminal.id} value={terminal.id}>
+                        {terminal.city} - {terminal.name}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </div>
 
-              <label className="grid gap-1 text-xs font-medium text-slate-500">
-                To
-                <Select
-                  value={form.destinationTerminalId}
-                  onChange={(event) =>
-                    updateForm({ destinationTerminalId: event.target.value })
-                  }
-                  required
-                >
-                  <option value="">Select terminal</option>
-                  {destinations.map((terminal) => (
-                    <option key={terminal.id} value={terminal.id}>
-                      {terminal.city} - {terminal.name}
-                    </option>
-                  ))}
-                </Select>
-              </label>
+              <div className="grid gap-1 text-xs font-medium text-slate-500">
+                <div className="flex items-center justify-between">
+                  <span>To</span>
+                  <button
+                    type="button"
+                    className="font-medium text-ecobus-red hover:underline"
+                    onClick={() =>
+                      updateForm({
+                        destinationIsCustom: !form.destinationIsCustom,
+                        destinationTerminalId: "",
+                        destinationCustomName: "",
+                      })
+                    }
+                  >
+                    {form.destinationIsCustom ? "Choose terminal instead" : "Use custom location"}
+                  </button>
+                </div>
+                {form.destinationIsCustom ? (
+                  <Input
+                    placeholder="e.g. Ijebu-Ode Park"
+                    value={form.destinationCustomName}
+                    onChange={(event) =>
+                      updateForm({ destinationCustomName: event.target.value })
+                    }
+                    required
+                  />
+                ) : (
+                  <Select
+                    value={form.destinationTerminalId}
+                    onChange={(event) =>
+                      updateForm({ destinationTerminalId: event.target.value })
+                    }
+                    required
+                  >
+                    <option value="">Select terminal</option>
+                    {destinations.map((terminal) => (
+                      <option key={terminal.id} value={terminal.id}>
+                        {terminal.city} - {terminal.name}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </div>
 
               <label className="grid gap-1 text-xs font-medium text-slate-500">
                 Departure
