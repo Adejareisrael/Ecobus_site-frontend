@@ -419,7 +419,7 @@ export default function AdminTripsPage() {
               </label>
 
               <label className="grid gap-1 text-xs font-medium text-slate-500">
-                Arrival
+                Estimated arrival time
                 <Input
                   type="time"
                   value={form.arrivalTime}
