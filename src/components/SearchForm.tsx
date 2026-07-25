@@ -141,7 +141,7 @@ export function SearchForm({
       </label>
 
       <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
-        Date
+        Travel date
         <Input
           type="date"
           name="date"
