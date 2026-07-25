@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Search } from "lucide-react";
 import { Trip } from "@/lib/types";
 import { getTrips } from "@/lib/api";
 import { TripCard } from "./TripCard";
 import { Select } from "./ui/Select";
+import { Input } from "./ui/Input";
 import { Card } from "./ui/Card";
 
 type PriceSort = "all" | "low" | "high";
@@ -23,6 +25,7 @@ function getHour(time: string) {
 export function TripResults({ trips, searchParams = {} }: Props) {
   const [priceSort, setPriceSort] = useState<PriceSort>("all");
   const [timeSort, setTimeSort] = useState<TimeFilter>("all");
+  const [locationQuery, setLocationQuery] = useState("");
   const [visibleTrips, setVisibleTrips] = useState(trips);
 
   useEffect(() => {
@@ -48,6 +51,14 @@ export function TripResults({ trips, searchParams = {} }: Props) {
 
   const filteredTrips = useMemo(() => {
     let list = [...visibleTrips];
+
+    /**
+     * 📍 LOCATION FILTER
+     */
+    const query = locationQuery.trim().toLowerCase();
+    if (query) {
+      list = list.filter((trip) => trip.routeLabel.toLowerCase().includes(query));
+    }
 
     /**
      * 🕒 TIME FILTER FIRST (narrowing logic)
@@ -76,13 +87,24 @@ export function TripResults({ trips, searchParams = {} }: Props) {
     }
 
     return list;
-  }, [priceSort, timeSort, visibleTrips]);
+  }, [priceSort, timeSort, locationQuery, visibleTrips]);
 
   return (
     <div className="space-y-5">
 
       {/* FILTER CONTROLS */}
-      <Card className="grid gap-4 p-4 md:grid-cols-2">
+      <Card className="grid gap-4 p-4 md:grid-cols-3">
+
+        <label className="relative flex items-center md:col-span-1">
+          <Search className="pointer-events-none absolute left-4 h-4 w-4 text-slate-400" />
+          <Input
+            type="text"
+            placeholder="Search by location (e.g. Lagos, Benin)"
+            value={locationQuery}
+            onChange={(e) => setLocationQuery(e.target.value)}
+            className="pl-10"
+          />
+        </label>
 
         <Select
           value={priceSort}
