@@ -46,6 +46,7 @@ export function PageTransition() {
     };
 
     const handleSubmit = (event: SubmitEvent) => {
+      if (event.defaultPrevented) return;
       const form = event.target as HTMLFormElement | null;
       if (!form || form.method.toLowerCase() !== "get") return;
       setLoading(true);
