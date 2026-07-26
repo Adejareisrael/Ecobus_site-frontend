@@ -57,7 +57,10 @@ export default function DeleteAccountPage() {
 
       <p className="rounded-lg bg-amber-50 px-3 py-2 text-center text-sm text-amber-700">
         This cannot be undone. Bookings tied to your account are kept for
-        records but are no longer linked to you.
+        records but are no longer linked to you. If you&apos;d rather
+        permanently erase a specific booking instead, use the &quot;Delete
+        ticket&quot; button on your dashboard before deleting your account —
+        you won&apos;t be able to sign in and do this afterward.
       </p>
 
       {message && (
