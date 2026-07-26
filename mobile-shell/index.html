@@ -40,110 +40,22 @@
 
       h1 {
         font-size: 28px;
-        margin: 0 0 8px;
-      }
-
-      p {
-        color: #cbd5e1;
-        line-height: 1.6;
         margin: 0;
-      }
-
-      button {
-        background: #2563eb;
-        border: none;
-        border-radius: 10px;
-        color: #f8fafc;
-        cursor: pointer;
-        display: none;
-        font-size: 16px;
-        font-weight: 600;
-        margin-top: 20px;
-        padding: 12px 28px;
-      }
-
-      button:active {
-        opacity: 0.85;
-      }
-
-      [data-state="error"] #status {
-        color: #fca5a5;
-      }
-
-      [data-state="error"] button {
-        display: inline-block;
       }
     </style>
   </head>
   <body>
-    <main id="app" data-state="connecting">
+    <!--
+      Not shown at runtime — Capacitor's server.url config (see
+      capacitor.config.ts) loads the live site directly as the app's own
+      origin instead, which is what actually gives native plugins (file
+      saving, sharing, the back button, Google Sign-in) access to the page.
+      This file only exists because the Capacitor CLI requires webDir to
+      point at some valid directory with an index.html to build.
+    -->
+    <main>
       <img src="ecobus-logo.jpeg" alt="Ecobus" />
       <h1>Ecobus</h1>
-      <p id="status">Connecting to Ecobus Transport...</p>
-      <button id="retry" type="button">Retry</button>
     </main>
-
-    <script src="config.js"></script>
-    <script>
-      (function () {
-        var FALLBACK_URL = "https://booking.ecobustransport.com";
-        var TIMEOUT_MS = 8000;
-
-        var targetUrl = window.ECOBUS_TARGET_URL || FALLBACK_URL;
-        var app = document.getElementById("app");
-        var statusEl = document.getElementById("status");
-        var retryButton = document.getElementById("retry");
-
-        function setState(state, message) {
-          app.setAttribute("data-state", state);
-          statusEl.textContent = message;
-        }
-
-        function checkAndRedirect() {
-          setState("connecting", "Connecting to Ecobus Transport...");
-
-          if (typeof navigator !== "undefined" && navigator.onLine === false) {
-            setState(
-              "error",
-              "No internet connection. Check your network and try again."
-            );
-            return;
-          }
-
-          var controller = new AbortController();
-          var timedOut = false;
-          var timer = setTimeout(function () {
-            timedOut = true;
-            controller.abort();
-          }, TIMEOUT_MS);
-
-          fetch(targetUrl, {
-            mode: "no-cors",
-            cache: "no-store",
-            signal: controller.signal,
-          })
-            .then(function () {
-              clearTimeout(timer);
-              window.location.href = targetUrl;
-            })
-            .catch(function () {
-              clearTimeout(timer);
-              setState(
-                "error",
-                timedOut
-                  ? "Taking too long to connect. Check your internet connection and try again."
-                  : "Couldn't connect to Ecobus Transport. Check your internet connection and try again."
-              );
-            });
-        }
-
-        retryButton.addEventListener("click", checkAndRedirect);
-        window.addEventListener("online", function () {
-          if (app.getAttribute("data-state") === "error") checkAndRedirect();
-        });
-
-        checkAndRedirect();
-      })();
-    </script>
   </body>
 </html>

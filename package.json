@@ -10,7 +10,7 @@
     "lint": "eslint",
     "db:setup": "prisma generate && DATABASE_URL=${DIRECT_URL:-$DATABASE_URL} prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "mobile:sync": "node scripts/generate-mobile-shell-config.mjs && cap sync",
+    "mobile:sync": "cap sync",
     "mobile:android": "cap open android",
     "mobile:ios": "cap open ios",
     "test": "vitest run",
@@ -28,6 +28,7 @@
     "uuid": "^11.1.1"
   },
   "dependencies": {
+    "@capacitor-community/media": "^9.1.0",
     "@capacitor-firebase/authentication": "^8.3.0",
     "@capacitor/android": "^8.4.0",
     "@capacitor/app": "^8.1.1",
