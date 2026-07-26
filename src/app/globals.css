@@ -87,13 +87,26 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   margin-right: 0.25rem;
 }
 
-/* The DateField overlay is the single source of truth for what's shown;
-   the native text is hidden except while actively focused/editing, since
-   its own rendering (or lack of it) is inconsistent across engines. */
-input[type="date"]:not(:focus) {
-  color: transparent;
+/* The DateField overlay is the single source of truth for what's shown.
+   On touch devices, tapping the field opens the OS date-picker dialog
+   and focus lingers on the input even after it's cancelled -- there's
+   no native sub-field text to reveal there, so keep the overlay shown
+   regardless of focus state. */
+@media (pointer: coarse) {
+  input[type="date"] {
+    color: transparent;
+  }
 }
 
-input[type="date"]:focus + .date-field-overlay {
-  display: none;
+/* On devices with a mouse/trackpad, users can type directly into the
+   native day/month/year sub-fields while focused, so hide our overlay
+   only during that active editing state and let the native text show. */
+@media (pointer: fine) {
+  input[type="date"]:not(:focus) {
+    color: transparent;
+  }
+
+  input[type="date"]:focus + .date-field-overlay {
+    display: none;
+  }
 }
