@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { Capacitor } from "@capacitor/core";
 
 type Theme = "light" | "dark";
 type ThemePreference = Theme | "system";
@@ -62,7 +63,13 @@ export const useThemeStore = create<ThemeState>()(
     {
       name: "ecobus-theme",
       onRehydrateStorage: () => (state) => {
-        const preference = state?.preference ?? state?.theme ?? "system";
+        // In the native app, always re-resolve from the device's current
+        // theme on every launch rather than trusting a manual override from
+        // a previous session -- the toggle can still be used mid-session,
+        // it just won't stick past a fresh app open.
+        const preference = Capacitor.isNativePlatform()
+          ? "system"
+          : (state?.preference ?? state?.theme ?? "system");
         const theme = resolveTheme(preference);
         applyTheme(theme);
         if (state) {

@@ -23,9 +23,11 @@ export const viewport: Viewport = {
 
 const themeScript = `
 try {
+  const isNative = Boolean(window.androidBridge) ||
+    Boolean(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.bridge);
   const stored = localStorage.getItem("ecobus-theme");
   const state = stored ? JSON.parse(stored)?.state : null;
-  const preference = state?.preference || state?.theme || "system";
+  const preference = isNative ? "system" : (state?.preference || state?.theme || "system");
   const theme = preference === "system"
     ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
     : preference;
