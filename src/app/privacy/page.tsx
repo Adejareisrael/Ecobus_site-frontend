@@ -113,6 +113,14 @@ export default function PrivacyPage() {
           above but are no longer linked to your personal account once
           deleted.
         </p>
+        <p className="text-slate-600">
+          You can also permanently delete an individual booking ticket from
+          your dashboard at any time using the &quot;Delete ticket&quot;
+          button on that booking. Unlike account deletion, this removes the
+          booking record itself rather than just unlinking it from your
+          account, so a deleted ticket can no longer be looked up, checked
+          in, or recovered.
+        </p>
       </section>
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">Contact</h2>

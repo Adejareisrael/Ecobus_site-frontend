@@ -2,7 +2,7 @@ export default function TermsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">
       <h1 className="text-3xl font-bold">Terms of Service</h1>
-      <p className="text-sm text-slate-500">Last updated: July 20, 2026</p>
+      <p className="text-sm text-slate-500">Last updated: July 26, 2026</p>
       <p className="text-slate-600">
         By using the Ecobus Transport website or mobile app, creating an
         account, booking a trip, or submitting a vehicle hire request,
@@ -54,6 +54,13 @@ export default function TermsPage() {
           Passengers must present a valid ticket, booking reference, or QR code
           when requested. Ecobus may verify tickets before boarding and may
           reject duplicate, altered, cancelled, or already checked-in tickets.
+        </p>
+        <p className="text-slate-600">
+          Signed-in customers may permanently delete a booking ticket from
+          their dashboard. Deleting a ticket is final, removes the
+          reservation entirely, and does not by itself entitle the passenger
+          to a refund; refunds and cancellations remain subject to the Ecobus
+          refund policy.
         </p>
       </section>
       <section className="space-y-2">
