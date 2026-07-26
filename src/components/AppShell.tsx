@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { PageTransition } from "@/components/PageTransition";
 import { PwaRegister } from "@/components/PwaRegister";
+import { NativeBackButton } from "@/components/NativeBackButton";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -25,6 +26,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <PageTransition />
       </Suspense>
       <PwaRegister />
+      <NativeBackButton />
     </>
   );
 }
