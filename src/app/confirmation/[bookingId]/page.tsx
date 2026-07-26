@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatNaira, formatTime12h, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
 import { cacheTicket, getCachedTicket } from "@/lib/offline-tickets";
-import { shareTicket, saveOrShareFile } from "@/lib/native-share";
+import { shareTicket, saveOrShareFile, saveImageToGallery } from "@/lib/native-share";
 
 export default function ConfirmationPage() {
   const router = useRouter();
@@ -423,7 +423,7 @@ export default function ConfirmationPage() {
     const filename = `Ecobus-${booking.reference}.png`;
 
     if (Capacitor.isNativePlatform()) {
-      await saveOrShareFile(blob, filename, "Save your Ecobus ticket");
+      await saveImageToGallery(blob, filename);
       return;
     }
 

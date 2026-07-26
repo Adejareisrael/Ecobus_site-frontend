@@ -1,6 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import { Share } from "@capacitor/share";
 import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Media } from "@capacitor-community/media";
 
 export type ShareTicketInput = {
   title: string;
@@ -69,5 +70,40 @@ export async function saveOrShareFile(
     return { shared: true };
   } catch {
     return { shared: false };
+  }
+}
+
+const GALLERY_ALBUM_NAME = "Ecobus";
+
+async function getOrCreateAlbum(name: string): Promise<string | undefined> {
+  const { albums } = await Media.getAlbums();
+  const existing = albums.find((album) => album.name === name);
+  if (existing) return existing.identifier;
+
+  await Media.createAlbum({ name });
+  const { albums: refreshed } = await Media.getAlbums();
+  return refreshed.find((album) => album.name === name)?.identifier;
+}
+
+// Saves straight to the device's photo gallery via MediaStore (Android
+// requires no runtime permission for this — apps can always write their own
+// images there under scoped storage). Falls back to the share sheet if
+// anything goes wrong, so Download always does something rather than fail
+// silently.
+export async function saveImageToGallery(blob: Blob, filename: string): Promise<ShareResult> {
+  if (!Capacitor.isNativePlatform()) return { shared: false };
+
+  try {
+    const base64 = await blobToBase64(blob);
+    const albumIdentifier = await getOrCreateAlbum(GALLERY_ALBUM_NAME);
+
+    await Media.savePhoto({
+      path: `data:image/png;base64,${base64}`,
+      albumIdentifier,
+      fileName: filename.replace(/\.png$/i, ""),
+    });
+    return { shared: true };
+  } catch {
+    return saveOrShareFile(blob, filename, "Save your Ecobus ticket");
   }
 }
