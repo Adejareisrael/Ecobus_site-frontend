@@ -200,6 +200,115 @@ export async function sendPasswordResetEmail(input: SendPasswordResetEmailInput)
   };
 }
 
+type SendCharterRequestNotificationInput = {
+  fullName: string;
+  phone: string;
+  email?: string | null;
+  pickup: string;
+  destination: string;
+  travelDate: string;
+  returnDate?: string | null;
+  passengers: number;
+  vehicleType?: string | null;
+  notes?: string | null;
+};
+
+function buildCharterRequestNotificationHtml(input: SendCharterRequestNotificationInput) {
+  const rows: [string, string][] = [
+    ["Full name", input.fullName],
+    ["Phone", input.phone],
+    ["Email", input.email || "—"],
+    ["Pickup", input.pickup],
+    ["Destination", input.destination],
+    ["Travel date", input.travelDate],
+    ["Return date", input.returnDate || "—"],
+    ["Number of buses", String(input.passengers)],
+    ["Vehicle type", input.vehicleType || "—"],
+    ["Notes", input.notes || "—"],
+  ];
+
+  return `
+    <div style="font-family:Arial,sans-serif;background:#f8fafc;padding:24px;color:#0f172a;">
+      <div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+        <div style="background:#7c3aed;color:#ffffff;padding:24px;">
+          <p style="margin:0;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;">Ecobus vehicle hire</p>
+          <h1 style="margin:8px 0 0;font-size:26px;">New charter request</h1>
+        </div>
+        <div style="padding:24px;">
+          <table style="width:100%;border-collapse:collapse;">
+            ${rows
+              .map(
+                ([label, value]) =>
+                  `<tr><td style="padding:8px 0;color:#64748b;vertical-align:top;">${escapeHtml(label)}</td><td style="padding:8px 0;text-align:right;font-weight:600;">${escapeHtml(value)}</td></tr>`
+              )
+              .join("")}
+          </table>
+          <p style="margin:20px 0 0;color:#64748b;font-size:13px;">Review and respond to this request from the admin panel's Vehicle hire section.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+export async function sendCharterRequestNotificationEmail(input: SendCharterRequestNotificationInput) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+  const recipient = process.env.SUPPORT_EMAIL;
+
+  if (!apiKey || !from || !recipient) {
+    return {
+      sent: false,
+      skipped: true,
+      error: "Resend is not configured. Add RESEND_API_KEY, EMAIL_FROM, and SUPPORT_EMAIL.",
+    };
+  }
+
+  const text = `New vehicle hire request:
+
+Full name: ${input.fullName}
+Phone: ${input.phone}
+Email: ${input.email || "—"}
+Pickup: ${input.pickup}
+Destination: ${input.destination}
+Travel date: ${input.travelDate}
+Return date: ${input.returnDate || "—"}
+Number of buses: ${input.passengers}
+Vehicle type: ${input.vehicleType || "—"}
+Notes: ${input.notes || "—"}
+
+Review this in the admin panel's Vehicle hire section.`;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: recipient,
+      subject: `New vehicle hire request from ${input.fullName}`,
+      text,
+      html: buildCharterRequestNotificationHtml(input),
+    }),
+  });
+
+  const data = (await res.json().catch(() => ({}))) as ResendResponse;
+  if (!res.ok) {
+    return {
+      sent: false,
+      skipped: false,
+      error: data.message || data.name || "Resend email failed.",
+    };
+  }
+
+  return {
+    sent: true,
+    skipped: false,
+    providerId: data.id,
+  };
+}
+
 export async function sendTicketEmail(input: SendTicketEmailInput) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;

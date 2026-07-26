@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthResponse, requireAdmin } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
+import { sendCharterRequestNotificationEmail } from "@/lib/resend-email";
 
 function formatRequest(request: {
   id: string;
@@ -78,6 +79,12 @@ export async function POST(req: NextRequest) {
         notes: input.notes?.trim() || null,
       },
     });
+
+    try {
+      await sendCharterRequestNotificationEmail(request);
+    } catch {
+      // Never let a notification failure mask a successful submission.
+    }
 
     return NextResponse.json(formatRequest(request), { status: 201 });
   } catch {
