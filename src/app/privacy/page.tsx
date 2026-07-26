@@ -2,7 +2,7 @@ export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">
       <h1 className="text-3xl font-bold">Privacy Policy</h1>
-      <p className="text-sm text-slate-500">Last updated: July 20, 2026</p>
+      <p className="text-sm text-slate-500">Last updated: July 26, 2026</p>
       <p className="text-slate-600">
         Ecobus Transport collects only the information needed to create,
         manage, verify, and support passenger bookings, vehicle hire requests,
@@ -20,7 +20,9 @@ export default function PrivacyPage() {
         <p className="text-slate-600">
           If you request a vehicle hire or charter, we additionally collect
           your pickup location, destination, travel dates, passenger count,
-          preferred vehicle type, and any notes you provide.
+          preferred vehicle type, and any notes you provide. This is sent to
+          Ecobus staff by email so a member of our team can follow up with
+          availability and pricing.
         </p>
         <p className="text-slate-600">
           Our servers automatically log the IP address of login, signup, and
@@ -53,7 +55,10 @@ export default function PrivacyPage() {
           When you use the &quot;Share&quot; option on a ticket, Ecobus does
           not send your data anywhere automatically — it opens your device&apos;s
           own share menu so you can choose where to send your ticket details
-          yourself (for example WhatsApp, Messages, or email).
+          yourself (for example WhatsApp, Messages, or email). In the mobile
+          app, the &quot;Download&quot; option saves a copy of your ticket
+          image directly to your device&apos;s photo gallery, in an
+          &quot;Ecobus&quot; album, so you have it on hand at boarding.
         </p>
       </section>
       <section className="space-y-2">
