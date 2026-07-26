@@ -67,7 +67,9 @@ export async function saveOrShareFile(
 
     await Share.share({ files: [written.uri], dialogTitle });
     return { shared: true };
-  } catch {
+  } catch (err) {
+    // TEMPORARY diagnostic — remove once native download/share/print is confirmed working.
+    window.alert(`DIAGNOSTIC\nsaveOrShareFile threw:\n${err instanceof Error ? err.message : String(err)}`);
     return { shared: false };
   }
 }
