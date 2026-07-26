@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeftRight, Search } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Select } from "./ui/Select";
-import { Input } from "./ui/Input";
+import { DateField } from "./ui/DateField";
 import { Terminal } from "@/lib/types";
 
 type Props = {
@@ -142,10 +142,8 @@ export function SearchForm({
 
       <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500">
         Travel date
-        <Input
-          type="date"
+        <DateField
           name="date"
-          placeholder="dd/mm/yyyy"
           min={minDate}
           value={date}
           onChange={(e) => setDate(e.target.value)}
@@ -155,10 +153,8 @@ export function SearchForm({
       {tripType === "round-trip" && (
         <label className="grid min-w-0 gap-1 text-xs font-medium text-slate-500 md:col-start-4">
           Return date
-          <Input
-            type="date"
+          <DateField
             name="returnDate"
-            placeholder="dd/mm/yyyy"
             min={date || minDate}
             value={returnDate}
             onChange={(e) => setReturnDate(e.target.value)}

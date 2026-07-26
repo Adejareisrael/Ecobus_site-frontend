@@ -79,7 +79,21 @@ body {
   }
 }
 
+input[type="date"] {
+  padding-right: 0.75rem;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator {
-  margin-left: 0.5rem;
-  padding-right: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+/* The DateField overlay is the single source of truth for what's shown;
+   the native text is hidden except while actively focused/editing, since
+   its own rendering (or lack of it) is inconsistent across engines. */
+input[type="date"]:not(:focus) {
+  color: transparent;
+}
+
+input[type="date"]:focus + .date-field-overlay {
+  display: none;
 }

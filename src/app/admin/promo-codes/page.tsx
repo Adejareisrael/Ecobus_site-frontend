@@ -5,6 +5,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { DateField } from "@/components/ui/DateField";
 import { Select } from "@/components/ui/Select";
 import { PromoCode } from "@/lib/types";
 import { formatNaira } from "@/lib/utils";
@@ -288,9 +289,7 @@ export default function AdminPromoCodesPage() {
 
               <label className="grid gap-1 text-xs font-medium text-slate-500">
                 Starts
-                <Input
-                  type="date"
-                  placeholder="dd/mm/yyyy"
+                <DateField
                   value={form.startsAt}
                   onChange={(event) => updateForm({ startsAt: event.target.value })}
                 />
@@ -298,9 +297,7 @@ export default function AdminPromoCodesPage() {
 
               <label className="grid gap-1 text-xs font-medium text-slate-500">
                 Expires
-                <Input
-                  type="date"
-                  placeholder="dd/mm/yyyy"
+                <DateField
                   value={form.expiresAt}
                   onChange={(event) => updateForm({ expiresAt: event.target.value })}
                 />

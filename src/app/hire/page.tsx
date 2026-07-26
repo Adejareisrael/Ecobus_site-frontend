@@ -5,6 +5,7 @@ import { BusFront, CalendarDays, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { DateField } from "@/components/ui/DateField";
 import { phoneInput, positiveIntegerInput } from "@/lib/form-input";
 
 const emptyForm = {
@@ -105,11 +106,11 @@ export default function HirePage() {
               <Input placeholder="Destination" value={form.destination} onChange={(e) => updateForm({ destination: e.target.value })} required />
               <label className="grid gap-1 text-xs font-medium text-slate-500">
                 Travel date
-                <Input type="date" placeholder="dd/mm/yyyy" min={minDate} value={form.travelDate} onChange={(e) => updateForm({ travelDate: e.target.value })} required />
+                <DateField min={minDate} value={form.travelDate} onChange={(e) => updateForm({ travelDate: e.target.value })} required />
               </label>
               <label className="grid gap-1 text-xs font-medium text-slate-500">
                 Return date
-                <Input type="date" placeholder="dd/mm/yyyy" min={form.travelDate || minDate} value={form.returnDate} onChange={(e) => updateForm({ returnDate: e.target.value })} />
+                <DateField min={form.travelDate || minDate} value={form.returnDate} onChange={(e) => updateForm({ returnDate: e.target.value })} />
               </label>
               <label className="grid gap-1 text-xs font-medium text-slate-500">
                 Number of buses

@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth-store";
 import { Input } from "@/components/ui/Input";
+import { DateField } from "@/components/ui/DateField";
 import { phoneInput } from "@/lib/form-input";
 
 export default function DashboardPage() {
@@ -438,9 +439,7 @@ export default function DashboardPage() {
                         <option value="Cancel">Cancel</option>
                       </select>
                       {changeRequest.requestType === "Reschedule" ? (
-                        <Input
-                          type="date"
-                          placeholder="dd/mm/yyyy"
+                        <DateField
                           value={changeRequest.preferredDate}
                           onChange={(event) =>
                             setChangeRequest((current) => ({
