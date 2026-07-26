@@ -22,6 +22,11 @@ const config: CapacitorConfig = {
     url: serverUrl,
     cleartext: serverUrl.startsWith("http://"),
   },
+  plugins: {
+    FirebaseAuthentication: {
+      providers: ["google.com"],
+    },
+  },
 };
 
 export default config;
