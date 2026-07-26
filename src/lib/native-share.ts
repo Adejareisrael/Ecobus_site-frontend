@@ -92,18 +92,24 @@ async function getOrCreateAlbum(name: string): Promise<string | undefined> {
 // silently.
 export async function saveImageToGallery(blob: Blob, filename: string): Promise<ShareResult> {
   if (!Capacitor.isNativePlatform()) return { shared: false };
+  window.alert("DIAGNOSTIC\nstep 1: starting");
 
   try {
     const base64 = await blobToBase64(blob);
+    window.alert("DIAGNOSTIC\nstep 2: base64 encoded, length " + base64.length);
+
     const albumIdentifier = await getOrCreateAlbum(GALLERY_ALBUM_NAME);
+    window.alert("DIAGNOSTIC\nstep 3: albumIdentifier = " + albumIdentifier);
 
     await Media.savePhoto({
       path: `data:image/png;base64,${base64}`,
       albumIdentifier,
       fileName: filename.replace(/\.png$/i, ""),
     });
+    window.alert("DIAGNOSTIC\nstep 4: savePhoto succeeded");
     return { shared: true };
-  } catch {
+  } catch (err) {
+    window.alert("DIAGNOSTIC\nthrew: " + (err instanceof Error ? err.message : String(err)));
     return saveOrShareFile(blob, filename, "Save your Ecobus ticket");
   }
 }
