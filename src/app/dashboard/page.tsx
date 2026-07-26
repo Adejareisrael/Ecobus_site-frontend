@@ -40,6 +40,9 @@ export default function DashboardPage() {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [confirmDeleteBookingId, setConfirmDeleteBookingId] = useState<string | null>(null);
+  const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
+  const [bookingDeleteError, setBookingDeleteError] = useState("");
 
   useEffect(() => {
     if (!user) {
@@ -170,6 +173,33 @@ export default function DashboardPage() {
       setDeleteError("Something went wrong. Please try again.");
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleDeleteBooking = async (bookingId: string) => {
+    if (!token) return;
+
+    setDeletingBookingId(bookingId);
+    setBookingDeleteError("");
+
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setBookingDeleteError(data.error ?? "Could not delete ticket.");
+        return;
+      }
+
+      setBookings((current) => current.filter((b) => b.id !== bookingId));
+      setConfirmDeleteBookingId(null);
+    } catch {
+      setBookingDeleteError("Something went wrong. Please try again.");
+    } finally {
+      setDeletingBookingId(null);
     }
   };
 
@@ -480,8 +510,44 @@ export default function DashboardPage() {
                 </div>
               )}
 
+              <div className="mt-4 border-t pt-4">
+                {confirmDeleteBookingId === booking.id ? (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-sm font-medium text-red-600">
+                      Permanently delete this ticket?
+                    </p>
+                    <Button
+                      className="bg-red-600 text-white hover:bg-red-700"
+                      onClick={() => handleDeleteBooking(booking.id)}
+                      disabled={deletingBookingId === booking.id}
+                    >
+                      {deletingBookingId === booking.id ? "Deleting..." : "Yes, delete ticket"}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setConfirmDeleteBookingId(null)}
+                      disabled={deletingBookingId === booking.id}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="text-red-600 hover:bg-red-50"
+                    onClick={() => setConfirmDeleteBookingId(booking.id)}
+                  >
+                    Delete ticket
+                  </Button>
+                )}
+              </div>
+
             </Card>
           ))
+        )}
+
+        {bookingDeleteError && (
+          <p className="text-sm text-red-600">{bookingDeleteError}</p>
         )}
 
       </div>

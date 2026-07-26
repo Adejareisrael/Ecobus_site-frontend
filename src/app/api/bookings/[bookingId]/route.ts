@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTokenFromRequest } from "@/lib/auth";
 import { BookingStatus } from "@/lib/types";
-import { isAuthResponse, requireAdmin } from "@/lib/api-auth";
+import { isAuthResponse, requireAdmin, requireAuth } from "@/lib/api-auth";
 
 const bookingStatuses: BookingStatus[] = [
   "Pending",
@@ -112,6 +112,33 @@ export async function PATCH(
       checkedInBy: booking.checkedInBy ?? null,
       createdAt: booking.createdAt.toISOString(),
     });
+  } catch {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ bookingId: string }> }
+) {
+  try {
+    const payload = requireAuth(req);
+    if (isAuthResponse(payload)) return payload;
+
+    const { bookingId } = await params;
+    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+
+    if (!booking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    }
+
+    if (payload.role !== "admin" && booking.userId !== payload.userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    await prisma.booking.delete({ where: { id: bookingId } });
+
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
