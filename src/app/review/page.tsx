@@ -28,6 +28,7 @@ export default function ReviewPage() {
   const setAppliedPromo = useBookingStore((s) => s.setAppliedPromo);
   const setLastBooking = useBookingStore((s) => s.setLastBooking);
   const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
 
   useEffect(() => {
     if (!trip || seats.length === 0) router.replace("/search");
@@ -69,7 +70,10 @@ export default function ReviewPage() {
 
     const res = await fetch("/api/bookings", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({
         trip,
         travelDate,
