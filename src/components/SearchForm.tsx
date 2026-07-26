@@ -145,6 +145,7 @@ export function SearchForm({
         <Input
           type="date"
           name="date"
+          placeholder="dd/mm/yyyy"
           min={minDate}
           value={date}
           onChange={(e) => setDate(e.target.value)}
@@ -157,6 +158,7 @@ export function SearchForm({
           <Input
             type="date"
             name="returnDate"
+            placeholder="dd/mm/yyyy"
             min={date || minDate}
             value={returnDate}
             onChange={(e) => setReturnDate(e.target.value)}

@@ -290,6 +290,7 @@ export default function AdminPromoCodesPage() {
                 Starts
                 <Input
                   type="date"
+                  placeholder="dd/mm/yyyy"
                   value={form.startsAt}
                   onChange={(event) => updateForm({ startsAt: event.target.value })}
                 />
@@ -299,6 +300,7 @@ export default function AdminPromoCodesPage() {
                 Expires
                 <Input
                   type="date"
+                  placeholder="dd/mm/yyyy"
                   value={form.expiresAt}
                   onChange={(event) => updateForm({ expiresAt: event.target.value })}
                 />

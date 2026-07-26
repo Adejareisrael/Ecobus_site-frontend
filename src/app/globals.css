@@ -78,3 +78,8 @@ body {
     box-shadow: 0 14px 38px rgb(14 165 233 / 0.18);
   }
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  margin-left: 0.5rem;
+  padding-right: 0.25rem;
+}

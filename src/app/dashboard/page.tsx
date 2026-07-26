@@ -440,6 +440,7 @@ export default function DashboardPage() {
                       {changeRequest.requestType === "Reschedule" ? (
                         <Input
                           type="date"
+                          placeholder="dd/mm/yyyy"
                           value={changeRequest.preferredDate}
                           onChange={(event) =>
                             setChangeRequest((current) => ({
