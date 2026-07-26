@@ -2,7 +2,7 @@ export default function RefundPolicyPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">
       <h1 className="text-3xl font-bold">Refund Policy</h1>
-      <p className="text-sm text-slate-500">Last updated: July 20, 2026</p>
+      <p className="text-sm text-slate-500">Last updated: July 26, 2026</p>
       <p className="text-slate-600">
         No payment is collected online — fares are paid in cash at the
         terminal at check-in. Refunds and trip changes are reviewed by Ecobus
@@ -18,6 +18,13 @@ export default function RefundPolicyPage() {
           requires no refund, since no payment was taken online. If a fare has
           already been paid in cash at the terminal, approved refunds are
           issued in cash or as travel credit at that terminal.
+        </p>
+        <p className="text-slate-600">
+          Contact support before using the &quot;Delete ticket&quot; button on
+          your dashboard if you may need a refund. Deleting a ticket
+          permanently removes the booking record, so support can no longer
+          look it up, verify it, or process a refund against it once it has
+          been deleted.
         </p>
       </section>
       <section className="space-y-2">
