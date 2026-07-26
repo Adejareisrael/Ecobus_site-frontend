@@ -2,11 +2,12 @@
 
 import { FormEvent, Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { DateField } from "@/components/ui/DateField";
 import { uppercaseCodeInput } from "@/lib/form-input";
 import { useAuthStore } from "@/store/auth-store";
 import { CachedTicket, getCachedTickets, isNativePlatform } from "@/lib/offline-tickets";
@@ -32,6 +33,7 @@ export default function BookingLookupPage() {
 }
 
 function BookingLookupContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
@@ -42,6 +44,13 @@ function BookingLookupContent() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [savedTickets, setSavedTickets] = useState<CachedTicket[]>([]);
+  const [changeRequest, setChangeRequest] = useState({
+    bookingId: "",
+    requestType: "Reschedule",
+    preferredDate: "",
+    reason: "",
+  });
+  const [changeMessage, setChangeMessage] = useState("");
   const isLoggedIn = hydrated && Boolean(user && token);
 
   useEffect(() => {
@@ -87,6 +96,43 @@ function BookingLookupContent() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await searchBookings();
+  };
+
+  const startEditBooking = (bookingId: string) => {
+    if (!isLoggedIn) {
+      router.push("/login");
+      return;
+    }
+    setChangeMessage("");
+    setChangeRequest((current) => ({ ...current, bookingId }));
+  };
+
+  const submitChangeRequest = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!token || !changeRequest.bookingId) return;
+
+    setChangeMessage("");
+    const res = await fetch("/api/booking-change-requests", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(changeRequest),
+    });
+
+    if (res.ok) {
+      setChangeMessage("Request sent. Ecobus support will review it.");
+      setChangeRequest({
+        bookingId: "",
+        requestType: "Reschedule",
+        preferredDate: "",
+        reason: "",
+      });
+    } else {
+      const data = (await res.json()) as { error?: string };
+      setChangeMessage(data.error ?? "Could not submit request.");
+    }
   };
 
   return (
@@ -161,9 +207,67 @@ function BookingLookupContent() {
                 <Link href={`/confirmation/${result.id}`}>
                   <Button className="mt-4 w-full">Open ticket</Button>
                 </Link>
+
+                {["Pending", "Confirmed"].includes(result.status) && (
+                  <div className="mt-3 border-t pt-3">
+                    {changeRequest.bookingId === result.id ? (
+                      <form
+                        onSubmit={submitChangeRequest}
+                        className="grid gap-3 md:grid-cols-[160px_180px_1fr_auto]"
+                      >
+                        <select
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                          value={changeRequest.requestType}
+                          onChange={(event) =>
+                            setChangeRequest((current) => ({
+                              ...current,
+                              requestType: event.target.value,
+                            }))
+                          }
+                        >
+                          <option value="Reschedule">Reschedule</option>
+                          <option value="Cancel">Cancel</option>
+                        </select>
+                        {changeRequest.requestType === "Reschedule" ? (
+                          <DateField
+                            value={changeRequest.preferredDate}
+                            onChange={(event) =>
+                              setChangeRequest((current) => ({
+                                ...current,
+                                preferredDate: event.target.value,
+                              }))
+                            }
+                          />
+                        ) : (
+                          <div className="hidden md:block" />
+                        )}
+                        <Input
+                          placeholder="Reason"
+                          value={changeRequest.reason}
+                          onChange={(event) =>
+                            setChangeRequest((current) => ({
+                              ...current,
+                              reason: event.target.value,
+                            }))
+                          }
+                          required
+                        />
+                        <Button type="submit">Send request</Button>
+                      </form>
+                    ) : (
+                      <Button variant="ghost" onClick={() => startEditBooking(result.id)}>
+                        Edit booking
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
+        )}
+
+        {changeMessage && (
+          <p className="mt-4 text-sm text-slate-600">{changeMessage}</p>
         )}
       </Card>
 
