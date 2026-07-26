@@ -33,8 +33,10 @@ export function GoogleSignInButton({ onError }: { onError?: (message: string) =>
 
       login(data.user as User, data.token as string);
       router.push((data.user as User).role === "admin" ? "/admin" : "/dashboard");
-    } catch {
-      onError?.("Google sign-in was cancelled or failed. Please try again.");
+    } catch (err) {
+      // TEMPORARY diagnostic — remove once native Google sign-in is confirmed working.
+      const detail = err instanceof Error ? err.message : JSON.stringify(err);
+      onError?.(`DIAGNOSTIC: ${detail}`);
     } finally {
       setLoading(false);
     }
