@@ -4,13 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import { Share2 } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
 import { Booking } from "@/lib/types";
 import { useBookingStore } from "@/store/booking-store";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatNaira, formatTime12h, getBookingTotal, getDiscountedTotal } from "@/lib/utils";
 import { cacheTicket, getCachedTicket } from "@/lib/offline-tickets";
-import { shareTicket } from "@/lib/native-share";
+import { shareTicket, saveOrShareFile } from "@/lib/native-share";
 
 export default function ConfirmationPage() {
   const router = useRouter();
@@ -84,6 +85,14 @@ export default function ConfirmationPage() {
   const shareCurrentTicket = async () => {
     if (!booking) return;
 
+    if (Capacitor.isNativePlatform()) {
+      const blob = await generateTicketBlob();
+      if (blob) {
+        const result = await saveOrShareFile(blob, `Ecobus-${booking.reference}.png`, `Ecobus ticket ${booking.reference}`);
+        if (result.shared) return;
+      }
+    }
+
     const ticketUrl = `${window.location.origin}/confirmation/${booking.id}?ref=${encodeURIComponent(booking.reference)}`;
     await shareTicket({
       title: `Ecobus ticket ${booking.reference}`,
@@ -92,8 +101,8 @@ export default function ConfirmationPage() {
     });
   };
 
-  const downloadTicket = async () => {
-    if (!booking || !qrCodeUrl) return;
+  const generateTicketBlob = async (): Promise<Blob | null> => {
+    if (!booking || !qrCodeUrl) return null;
 
     const NAVY = "#0f172a";
     const MUTED = "#64748b";
@@ -107,7 +116,7 @@ export default function ConfirmationPage() {
     canvas.width = 900;
     canvas.height = 1440;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) return null;
 
     const loadImage = (src: string) =>
       new Promise<HTMLImageElement>((resolve, reject) => {
@@ -400,17 +409,45 @@ export default function ConfirmationPage() {
     ctx.fillText(`${booking.reference}  ·  ecobustransport.com`, cardX + cardW / 2, footerRuleY + 34);
     ctx.textAlign = "left";
 
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Ecobus-${booking.reference}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }, "image/png");
+    return new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), "image/png");
+    });
+  };
+
+  const downloadTicket = async () => {
+    if (!booking) return;
+    const blob = await generateTicketBlob();
+    if (!blob) return;
+
+    const filename = `Ecobus-${booking.reference}.png`;
+
+    if (Capacitor.isNativePlatform()) {
+      await saveOrShareFile(blob, filename, "Save your Ecobus ticket");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const printTicket = async () => {
+    if (!booking) return;
+
+    if (Capacitor.isNativePlatform()) {
+      const blob = await generateTicketBlob();
+      if (blob) {
+        await saveOrShareFile(blob, `Ecobus-${booking.reference}.png`, "Print your Ecobus ticket");
+      }
+      return;
+    }
+
+    window.print();
   };
 
   if (loading) {
@@ -541,7 +578,7 @@ export default function ConfirmationPage() {
           <Share2 className="h-4 w-4" />
           Share
         </Button>
-        <Button variant="secondary" onClick={() => window.print()}>
+        <Button variant="secondary" onClick={printTicket}>
           Print
         </Button>
         <Button
