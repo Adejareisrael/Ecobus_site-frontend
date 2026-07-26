@@ -417,19 +417,13 @@ export default function ConfirmationPage() {
   const downloadTicket = async () => {
     if (!booking) return;
 
-    // TEMPORARY diagnostic — remove once native download/share/print is confirmed working.
-    window.alert(
-      `DIAGNOSTIC\nisNativePlatform: ${Capacitor.isNativePlatform()}\nplatform: ${Capacitor.getPlatform()}`
-    );
-
     const blob = await generateTicketBlob();
     if (!blob) return;
 
     const filename = `Ecobus-${booking.reference}.png`;
 
     if (Capacitor.isNativePlatform()) {
-      const result = await saveOrShareFile(blob, filename, "Save your Ecobus ticket");
-      window.alert(`DIAGNOSTIC\nsaveOrShareFile result.shared: ${result.shared}`);
+      await saveOrShareFile(blob, filename, "Save your Ecobus ticket");
       return;
     }
 
