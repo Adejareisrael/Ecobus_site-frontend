@@ -82,6 +82,19 @@ export const terminals: Terminal[] = [
     mapUrl: "https://maps.google.com/?q=Ukumango+Onitsha",
     facilities: ["Waiting area", "Boarding support"],
   },
+
+  // ABUJA
+  {
+    id: "abuja-utako",
+    name: "Utako Terminal",
+    city: "Abuja",
+    state: "FCT",
+    address: "Okosisi Garden, Beside Jabi Park, Utako, Abuja",
+    phone: "+234 913 399 4004",
+    hours: "6:00 AM - 6:00 PM",
+    mapUrl: "https://maps.google.com/?q=Okosisi+Garden+Beside+Jabi+Park+Utako+Abuja",
+    facilities: ["Waiting area", "Boarding support", "Ticket support"],
+  },
 ];
 
 export const terminalsByState = {
@@ -98,6 +111,10 @@ export const terminalsByState = {
 
   Anambra: [
     "onitsha-ukumango",
+  ],
+
+  FCT: [
+    "abuja-utako",
   ],
 };
 
