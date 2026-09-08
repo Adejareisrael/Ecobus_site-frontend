@@ -40,7 +40,7 @@ export function GoogleSignInButton({ onError }: { onError?: (message: string) =>
       router.push(data.user.role === "admin" ? "/admin" : "/dashboard");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Google sign-in failed";
-      onError?.(`${message}. Please try again.`);
+      onError?.(`${message.replace(/[.\s]+$/, "")}. Please try again.`);
     } finally {
       setLoading(false);
     }

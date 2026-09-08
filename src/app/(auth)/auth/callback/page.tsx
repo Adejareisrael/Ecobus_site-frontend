@@ -7,6 +7,14 @@ import { useEffect, useRef, useState } from "react";
 import { exchangeSupabaseCode } from "@/lib/supabase-auth-client";
 import { useAuthStore } from "@/store/auth-store";
 
+export function googleAuthErrorMessage(reason: unknown): string {
+  const detail = reason instanceof Error ? reason.message.toLowerCase() : "";
+  if (detail.includes("access_denied") || detail.includes("cancel")) {
+    return "Google sign-in was cancelled. Please try again when you're ready.";
+  }
+  return "We couldn't complete Google sign-in. Please return to login and try again.";
+}
+
 export default function SupabaseAuthCallbackPage() {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
@@ -36,10 +44,7 @@ export default function SupabaseAuthCallbackPage() {
       router.refresh();
     };
 
-    void finishSignIn().catch((reason: unknown) => {
-      const message = reason instanceof Error ? reason.message : "Google sign-in failed";
-      setError(message);
-    });
+    void finishSignIn().catch((reason: unknown) => setError(googleAuthErrorMessage(reason)));
   }, [login, router]);
 
   if (error) {
