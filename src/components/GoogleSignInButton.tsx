@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { useAuthStore } from "@/store/auth-store";
-import type { User } from "@/store/auth-store";
-import { signInWithGoogle } from "@/lib/firebase-client";
+import { beginNativeGoogleSignIn } from "@/lib/supabase-auth-client";
+import { signInWithGoogleWeb } from "@/lib/firebase-client";
+import { useAuthStore, type User } from "@/store/auth-store";
 
 export function GoogleSignInButton({ onError }: { onError?: (message: string) => void }) {
   const router = useRouter();
-  const login = useAuthStore((s) => s.login);
+  const login = useAuthStore((state) => state.login);
   const [loading, setLoading] = useState(false);
 
   const handleClick = async () => {
@@ -17,24 +18,29 @@ export function GoogleSignInButton({ onError }: { onError?: (message: string) =>
     onError?.("");
 
     try {
-      const { idToken } = await signInWithGoogle();
+      if (Capacitor.isNativePlatform()) {
+        await beginNativeGoogleSignIn();
+        return;
+      }
 
-      const res = await fetch("/api/auth/firebase", {
+      const { idToken } = await signInWithGoogleWeb();
+
+      const response = await fetch("/api/auth/firebase", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
-      const data = await res.json();
+      const data = (await response.json()) as { error?: string; token?: string; user?: User };
 
-      if (!res.ok) {
-        onError?.(data.error ?? "Google sign-in failed");
-        return;
+      if (!response.ok || !data.token || !data.user) {
+        throw new Error(data.error || "Google sign-in failed");
       }
 
-      login(data.user as User, data.token as string);
-      router.push((data.user as User).role === "admin" ? "/admin" : "/dashboard");
-    } catch {
-      onError?.("Google sign-in was cancelled or failed. Please try again.");
+      login(data.user, data.token);
+      router.push(data.user.role === "admin" ? "/admin" : "/dashboard");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Google sign-in failed";
+      onError?.(`${message}. Please try again.`);
     } finally {
       setLoading(false);
     }

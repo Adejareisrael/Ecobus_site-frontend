@@ -15,6 +15,24 @@ To point a build at another production URL:
 CAPACITOR_SERVER_URL=https://your-production-domain.com npm run mobile:sync
 ```
 
+## Native Google authentication
+
+Website visitors continue to use Firebase Google authentication. Android and
+iOS builds use Supabase OAuth only when Capacitor reports a native platform.
+
+- Supabase callback: `com.ecobustransport.app://auth/callback`
+- Supabase site URL: `https://bookings.ecobustransport.com`
+- Google OAuth redirect URI: `https://YOUR_AUTH_PROJECT_REF.supabase.co/auth/v1/callback`
+
+These public variables may be set in Vercel to override the checked-in mobile
+project configuration:
+
+- `NEXT_PUBLIC_SUPABASE_AUTH_URL`
+- `NEXT_PUBLIC_SUPABASE_AUTH_PUBLISHABLE_KEY`
+
+The publishable key is safe in the browser bundle. Mobile sign-in verification
+does not use a Supabase service-role or secret key.
+
 ## Useful Commands
 
 ```bash
@@ -27,9 +45,14 @@ npm run mobile:ios
 
 The release upload keystore is **not** in this repo (see `android/.gitignore`
 — `*.jks`, `*.keystore`, and `keystore.properties` are all excluded on
-purpose). It lives at `~/ecobus-android-signing/ecobus-upload-key.jks` on the
-machine it was generated on, with its passwords in `android/keystore.properties`
-(local-only, gitignored).
+purpose). On the original build Mac, the likely upload key is currently at
+`~/Documents/Ecobus Keys/ecobus-release-key.jks/Untitled.jks`. Confirm that it
+matches the existing Play Console upload certificate before using it.
+
+There is currently no local `android/keystore.properties`, so command-line
+release bundles are unsigned until that file is configured with the original
+key alias and passwords. Android Studio's **Generate Signed App Bundle** flow
+can use the same keystore without creating or committing that properties file.
 
 **Back up both files somewhere durable (password manager + offline copy) right
 away.** If this keystore is ever lost, there is no recovery — you cannot
@@ -50,10 +73,11 @@ the file to upload to Play Console. If `keystore.properties` is missing, the
 release build type falls back to being unsigned (won't be accepted by Play
 Console, but debug builds/CI still work without it).
 
-Before increasing `versionCode`/`versionName` in `android/app/build.gradle`
-for a new release, confirm you're signing with the same keystore as the
-previous upload — Play Console rejects a bundle signed with a different key
-once the app has been published once.
+The Supabase Google sign-in release uses `versionCode 2` and `versionName 1.0.1`.
+Before increasing those values again in `android/app/build.gradle`,
+confirm you're signing with the same keystore as the previous upload — Play
+Console rejects a bundle signed with a different key once the app has been
+published once.
 
 ## Store Accounts Needed
 

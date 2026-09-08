@@ -8,6 +8,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { PwaRegister } from "@/components/PwaRegister";
 import { NativeBackButton } from "@/components/NativeBackButton";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { SupabaseAuthDeepLinkHandler } from "@/components/SupabaseAuthDeepLinkHandler";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -32,6 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Suspense>
       <PwaRegister />
       <NativeBackButton />
+      <SupabaseAuthDeepLinkHandler />
     </>
   );
 }

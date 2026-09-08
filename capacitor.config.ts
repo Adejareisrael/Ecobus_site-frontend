@@ -5,7 +5,7 @@ const serverUrl =
 
 // server.url loads the production site directly as the app's own origin, so
 // Capacitor's native bridge (Filesystem, Share, App back-button handling,
-// Firebase Auth, etc.) is actually wired up on the page the user sees.
+// native plugins, etc.) is actually wired up on the page the user sees.
 //
 // We previously routed through a bundled local "mobile-shell" page that
 // health-checked serverUrl and then redirected to it — that gave a nicer
@@ -21,11 +21,6 @@ const config: CapacitorConfig = {
   server: {
     url: serverUrl,
     cleartext: serverUrl.startsWith("http://"),
-  },
-  plugins: {
-    FirebaseAuthentication: {
-      providers: ["google.com"],
-    },
   },
 };
 

@@ -23,13 +23,20 @@ vi.mock("@capacitor/share", () => ({
   Share: { share: shareMock },
 }));
 
-const nativeSignInWithGoogle = vi.fn();
-const nativeGetIdToken = vi.fn();
-vi.mock("@capacitor-firebase/authentication", () => ({
-  FirebaseAuthentication: {
-    signInWithGoogle: (...args: unknown[]) => nativeSignInWithGoogle(...args),
-    getIdToken: (...args: unknown[]) => nativeGetIdToken(...args),
+const browserOpen = vi.fn();
+vi.mock("@capacitor/browser", () => ({
+  Browser: {
+    open: (...args: unknown[]) => browserOpen(...args),
+    close: vi.fn(),
   },
+}));
+
+const signInWithOAuth = vi.fn();
+const exchangeCodeForSession = vi.fn();
+vi.mock("@supabase/supabase-js", () => ({
+  createClient: vi.fn(() => ({
+    auth: { signInWithOAuth, exchangeCodeForSession },
+  })),
 }));
 
 const webSignInWithPopup = vi.fn();
@@ -206,40 +213,109 @@ describe("native-share", () => {
   });
 });
 
-describe("firebase-client", () => {
+describe("supabase-auth-client", () => {
   beforeEach(() => {
     vi.resetModules();
-    nativeSignInWithGoogle.mockReset();
-    nativeGetIdToken.mockReset();
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_AUTH_URL", "https://project.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_AUTH_PUBLISHABLE_KEY", "sb_publishable_test");
+    browserOpen.mockReset();
+    signInWithOAuth.mockReset();
+    exchangeCodeForSession.mockReset();
     webSignInWithPopup.mockReset();
   });
 
-  it("uses the native Google Sign-In SDK on a native platform, not the web popup", async () => {
-    const { Capacitor } = await import("@capacitor/core");
-    vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
-    nativeSignInWithGoogle.mockResolvedValue({ user: {}, credential: null, additionalUserInfo: null });
-    nativeGetIdToken.mockResolvedValue({ token: "native-firebase-id-token" });
-
-    const { signInWithGoogle } = await import("@/lib/firebase-client");
-    const result = await signInWithGoogle();
-
-    expect(nativeSignInWithGoogle).toHaveBeenCalled();
-    expect(webSignInWithPopup).not.toHaveBeenCalled();
-    expect(result).toEqual({ idToken: "native-firebase-id-token" });
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
-  it("uses the web popup flow on non-native platforms, not the native SDK", async () => {
+  it("opens Supabase Google OAuth in the system browser on native platforms", async () => {
     const { Capacitor } = await import("@capacitor/core");
-    vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
-    webSignInWithPopup.mockResolvedValue({
-      user: { getIdToken: vi.fn().mockResolvedValue("web-firebase-id-token") },
+    vi.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+    signInWithOAuth.mockResolvedValue({
+      data: { url: "https://project.supabase.co/auth/v1/authorize" },
+      error: null,
     });
 
-    const { signInWithGoogle } = await import("@/lib/firebase-client");
-    const result = await signInWithGoogle();
+    const { beginNativeGoogleSignIn } = await import("@/lib/supabase-auth-client");
+    await beginNativeGoogleSignIn();
 
-    expect(webSignInWithPopup).toHaveBeenCalled();
-    expect(nativeSignInWithGoogle).not.toHaveBeenCalled();
-    expect(result).toEqual({ idToken: "web-firebase-id-token" });
+    expect(signInWithOAuth).toHaveBeenCalledWith({
+      provider: "google",
+      options: {
+        redirectTo: "com.ecobustransport.app://auth/callback",
+        skipBrowserRedirect: true,
+      },
+    });
+    expect(browserOpen).toHaveBeenCalledWith({
+      url: "https://project.supabase.co/auth/v1/authorize",
+      toolbarColor: "#173a8f",
+    });
+  });
+
+  it("prevents the app-only Supabase flow from replacing website authentication", async () => {
+    const { Capacitor } = await import("@capacitor/core");
+    vi.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
+
+    const { beginNativeGoogleSignIn } = await import("@/lib/supabase-auth-client");
+
+    await expect(beginNativeGoogleSignIn()).rejects.toThrow("only run inside the Ecobus app");
+    expect(signInWithOAuth).not.toHaveBeenCalled();
+    expect(browserOpen).not.toHaveBeenCalled();
+  });
+
+  it("keeps the existing Firebase popup flow for website visitors", async () => {
+    webSignInWithPopup.mockResolvedValue({
+      user: { getIdToken: vi.fn().mockResolvedValue("firebase-web-token") },
+    });
+
+    const { signInWithGoogleWeb } = await import("@/lib/firebase-client");
+    await expect(signInWithGoogleWeb()).resolves.toEqual({ idToken: "firebase-web-token" });
+    expect(webSignInWithPopup).toHaveBeenCalledOnce();
+  });
+
+  it("accepts only the Ecobus native callback URL", async () => {
+    const { nativeAuthCallbackPath } = await import(
+      "@/components/SupabaseAuthDeepLinkHandler"
+    );
+
+    expect(
+      nativeAuthCallbackPath("com.ecobustransport.app://auth/callback?code=abc123")
+    ).toBe("/auth/callback?code=abc123");
+    expect(nativeAuthCallbackPath("https://malicious.test/auth/callback?code=abc123")).toBeNull();
+  });
+
+  it("exchanges the OAuth code and hands the verified session to the Ecobus API", async () => {
+    exchangeCodeForSession.mockResolvedValue({
+      data: { session: { access_token: "supabase-access-token" } },
+      error: null,
+    });
+    const appResult = {
+      token: "ecobus-jwt",
+      user: {
+        id: "user-1",
+        name: "Ada Customer",
+        email: "ada@example.com",
+        phone: null,
+        role: "customer" as const,
+      },
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(appResult), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { exchangeSupabaseCode } = await import("@/lib/supabase-auth-client");
+    const result = await exchangeSupabaseCode("oauth-code");
+
+    expect(exchangeCodeForSession).toHaveBeenCalledWith("oauth-code");
+    expect(fetchMock).toHaveBeenCalledWith("/api/auth/supabase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken: "supabase-access-token" }),
+    });
+    expect(result).toEqual(appResult);
   });
 });
