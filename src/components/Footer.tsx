@@ -66,11 +66,6 @@ export function Footer() {
                   Book a trip
                 </a>
               </li>
-              <li>
-                <a href="/hire" className="hover:text-ecobus-red dark:hover:text-sky-300">
-                  Hire a bus
-                </a>
-              </li>
               {isCustomer && (
                 <li>
                   <a href="/dashboard" className="hover:text-ecobus-purple dark:hover:text-cyan-300">
@@ -85,18 +80,6 @@ export function Footer() {
                   </a>
                 </li>
               )}
-              {hydrated && !user && (
-                <li>
-                  <a href="/login" className="hover:text-ecobus-red dark:hover:text-sky-300">
-                    Login
-                  </a>
-                </li>
-              )}
-              <li>
-                <a href="/lookup" className="hover:text-ecobus-red dark:hover:text-sky-300">
-                  Find booking
-                </a>
-              </li>
               <li>
                 <a href="/privacy" className="hover:text-ecobus-red dark:hover:text-sky-300">
                   Privacy
