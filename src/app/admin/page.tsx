@@ -368,7 +368,7 @@ export default function AdminPage() {
                       src={
                         settings.popularRouteImages[index] ||
                         defaultSiteSettings.popularRouteImages[index] ||
-                        "/route-lagos-benin.jpg"
+                        "/route-lagos-benin.png"
                       }
                       alt=""
                       className="h-full w-full object-cover"

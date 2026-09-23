@@ -156,7 +156,7 @@ function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProp
 
   const visibleRoutes = Array.from({ length: visibleCount }, (_, i) => {
     const idx = (current + i) % total;
-    return { idx, route: routes[idx], image: routeImages[idx] || fallbackImages[idx] || "/route-lagos-benin.jpg" };
+    return { idx, route: routes[idx], image: routeImages[idx] || fallbackImages[idx] || "/route-lagos-benin.png" };
   });
 
   return (
@@ -261,7 +261,7 @@ function PopularRoutesSlider({ routes, routeImages, fallbackImages }: SliderProp
             >
               <div className="relative h-64 w-full">
                 <Image
-                  src={routeImages[expanded] || fallbackImages[expanded] || "/route-lagos-benin.jpg"}
+                  src={routeImages[expanded] || fallbackImages[expanded] || "/route-lagos-benin.png"}
                   alt=""
                   fill
                   sizes="(max-width: 639px) calc(100vw - 32px), 448px"
